@@ -462,6 +462,7 @@ Continues the spec's numbering (D1–D34).
 | D78 | Web interface guidelines fixes: skip link; curly quotes and a next step in error copy (revises the spec's exact copy); input `name` and `autocomplete="off"`; warn before leaving with an unsent draft; hover states; `touch-action: manipulation`; `text-wrap: balance`; `color-scheme` and `theme-color`; preconnect to the API; person names `translate="no"` | Skip the review (cut in D46) | `CLAUDE.md` requires one guidelines review before submitting | AI proposal accepted by Adrian |
 | D79 | Guideline items not applied: Title Case (the copy is sentence case, as the spec and the `frontend-design` style use); a spinner while sending ("Adding…" on a disabled button says more); `autoFocus` kept (it runs only right after the user opens the form). URL state is listed under "more time" and left for Adrian to decide | Apply every rule literally | Each conflicts with a recorded choice or adds a feature the brief doesn't ask for | AI (builder's call) |
 | D80 | An empty users response says `No users found.` | `No users match ""` | The last open code-review nit | AI proposal accepted by Adrian |
+| D81 | Selected user and search are not kept in the URL; listed under "What I'd do with more time" | Sync them to query params (Web Interface Guidelines) | Adrian: leave it because of the time. The brief doesn't ask for it | Adrian |
 
 ## Skills used
 

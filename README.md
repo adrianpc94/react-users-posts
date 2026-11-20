@@ -66,7 +66,7 @@ Each feature folder has its own CSS file; shared tokens and controls live in
 - `docs/superpowers/specs/…-design.md`: the design spec (decisions D1–D34,
   test strategy, manual checklist).
 - `docs/superpowers/plans/…-users-posts.md`: the implementation plan and the
-  build record (decisions D35–D80, reviews, every test run, manual and
+  build record (decisions D35–D81, reviews, every test run, manual and
   exploratory results).
 - `docs/ai-usage-log.md`: what I asked the AI, what I accepted, what was
   corrected, step by step.
@@ -82,7 +82,7 @@ records are in the
 [design spec](docs/superpowers/specs/2026-11-20-users-posts-design.md#decisions)
 (D1–D34) and the
 [implementation plan](docs/superpowers/plans/2026-11-20-users-posts.md#decisions)
-(D35–D80). The main ones:
+(D35–D81). The main ones:
 
 - **Plain `fetch` + one small hook, no data library.** A generic
   `useRequest<T>(url)` returns a typed request state (`loading`, `success`

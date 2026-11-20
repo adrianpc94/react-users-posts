@@ -62,3 +62,8 @@ Running log for the README's "How I used AI" section. Format and rules:
   - **The AI's clock error:** it misread "CST" (Cuba Standard Time, UTC−5) as US Central and told Adrian 1 h 46 had passed at the plan review, when only 46 min had. Adrian's time-saving cuts (D46) were based on that wrong figure. Recorded as D68; the README now states the real timeline from git.
   - **Attribution:** the README had said Adrian ran the manual checks; it now says the AI ran them with Playwright at his request.
   - **A guideline the AI itself broke:** while applying the guidelines, the AI added `outline: none` on `main` (an anti-pattern they flag), noticed it, and removed it.
+
+### 2026-11-20 URL state
+- **Asked:** The AI asked whether to keep the selected user and the search in the URL (a Web Interface Guidelines rule, not in the brief).
+- **Accepted:** Nothing to build.
+- **Corrected:** Adrian decided to leave it out because of the time (D81); it stays under "What I'd do with more time".
