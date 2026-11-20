@@ -45,3 +45,8 @@ Running log for the README's "How I used AI" section. Format and rules:
 - **Asked:** Adrian approved fixing four of the six minor code-review findings.
 - **Accepted:** Each fix was test-first. "+ New post" now toggles the form and points at it with `aria-controls` (new tests E15, E16). "just added" moved out of the post heading (E10 tightened to an exact heading name). The `fetch` mock rejects a request that is already cancelled (E17). Tests query by role or label: field errors through their accessible description, loading and no-match messages through `role="status"`, posts through their heading. 30/30 tests pass; build, lint and a browser check are clean.
 - **Corrected:** Nothing from Adrian. The AI kept four text queries for plain text that has no role or label, and recorded why.
+
+### 2026-11-20 Deprecated API check
+- **Asked:** Adrian asked to check that no deprecated code is used, pointing at `FormEvent`.
+- **Accepted:** `FormEvent` was replaced with `SubmitEvent` in `useNewPostForm`. The AI then listed every `@deprecated` declaration in the libraries the app imports and compared that list with what the code uses; nothing else was deprecated. 30/30 tests pass; build and lint are clean.
+- **Corrected:** Adrian caught it. The AI had written the deprecated `FormEvent` in its own code and hadn't checked for deprecations.

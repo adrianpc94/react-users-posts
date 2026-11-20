@@ -416,6 +416,7 @@ Continues the spec's numbering (D1–D34).
 | D64 | "just added" tag sits beside the post heading, not inside it | Keep it inside the `<h3>` | The heading name should be the title alone (code review) | AI proposal accepted by Adrian |
 | D65 | Tests query by role or label: field errors through the accessible description, messages through `role="status"`, posts through their heading. Four text queries remain for plain text with no role | Keep `getByText` | `CLAUDE.md` rule; the description checks also prove that each error is linked to its field (code review) | AI proposal accepted by Adrian |
 | D66 | Two review nits left open: a message for an empty `/users` response, and clearing the POST error on edit | Fix them too | The API never returns an empty list; the error clears on the next submit. Listed in the README under "more time" | AI proposal accepted by Adrian |
+| D67 | Form submit handler typed with `SubmitEvent<HTMLFormElement>`, not `FormEvent` | Keep `FormEvent` | `@types/react` 19.3 marks `FormEvent` deprecated ("doesn't actually exist"). A scan of every API used against the `@deprecated` markers in React, react-dom, Testing Library, user-event, jest-dom and Vitest found no other deprecated use | Adrian |
 
 ## Skills used
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { createPost, nextLocalId, type CreatedPost } from '../api';
 
 export type FieldName = 'title' | 'body';
@@ -48,7 +48,7 @@ export function useNewPostForm({ userId, onCreated, onClose }: Options) {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submit.status === 'submitting') return;
 
