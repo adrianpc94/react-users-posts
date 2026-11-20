@@ -405,6 +405,8 @@ Continues the spec's numbering (D1–D34).
 | D53 | `nextLocalId()` lives in `src/api.ts` | Module counter inside `NewPostForm.tsx` | Component files export only components (Fast Refresh) | AI (builder's call) |
 | D54 | No tests dropped. Restore getJson, Cancel and RF4, and add a test for every edge case found (list E1–E14 below). Partly reverses D46; the build will overrun the 3-hour budget | Keep D46's cuts (11 tests) | Adrian wants thorough test coverage over the time limit | Adrian |
 | D55 | A user with no posts shows `No posts yet.` | Show an empty list | The spec is silent; an empty panel looks broken. Found while listing edge cases | AI (builder's call) |
+| D56 | Selected-user marker drawn as a CSS border triangle, not `::before` text (corrects D52) | `content: '▸ '`; CSS alt-text syntax | Found in the browser check: Chrome includes `::before` text in the accessible name ("▸ Leanne Graham"). jsdom ignores CSS, so the tests could not catch it | AI (builder's call) |
+| D57 | The Task 6 styling pass is done after all (reverses that part of D46). Palette: slate paper, navy ink, bottle-green actions, highlighter-yellow selection. Type: a book serif for headings and the system sans for the UI. Layout: centred, max 72rem | Keep only the minimal CSS | Adrian: "the UI is unaligned right and ugly" | Adrian |
 
 ## Skills used
 
@@ -413,7 +415,12 @@ Continues the spec's numbering (D1–D34).
 | `superpowers:writing-plans` | Planning | Structure of this plan, Review Focus, self-review |
 | `typescript-best-practices` | Planning (applies to Tasks 2–5) | Discriminated unions (`RequestState`, `SubmitState`), exhaustive `never` switch; branded types considered and rejected (D38); Zod section ignored per D1 |
 | `vercel-react-best-practices` | Planning (applies to Tasks 3–5) | Client-side rules listed in Global Constraints (derived state, handlers not effects, functional setState, primitive deps, conditional rendering, no barrels) |
-| `ai-log` | Planning | Logged the planning step and the plan review in `docs/ai-usage-log.md` |
+| `ai-log` | Planning, build | Logged the planning step, the plan review and the build in `docs/ai-usage-log.md` |
+| `superpowers:executing-plans` | Tasks 1–7 | Inline execution with a ledger (`.superpowers/sdd/…/progress.md`), one commit per task |
+| `superpowers:test-driven-development` | Tasks 2–5 | Every test written first and watched failing; mutation check on E10 |
+| `typescript-best-practices` | Tasks 2–5 | Discriminated unions (`RequestState`, `SubmitState`), `assertNever` |
+| `vercel-react-best-practices` | Tasks 3–5 | Search derived in render; submit/retry/cancel in handlers; functional updates; keyed remount |
+| `code-review` (medium) | Task 7 | Final review of `d33672f..HEAD` |
 
 ## Reviews
 
@@ -421,6 +428,7 @@ Continues the spec's numbering (D1–D34).
 |---|---|---|---|---|
 | 2026-11-20 | This plan vs the spec (coverage, step clarity, type consistency, Review Focus, proportion) | AI self-review (`writing-plans` checklist) | Two spec items had no explicit step: "+ New post" available in every posts state (D25), and the selection persisting through search (D17). The test-count line was ambiguous. Types and names were consistent across tasks; every Review Focus item has an owning test | Fixed inline (Task 5 Step 4, Task 4 Interfaces, Automated testing) |
 | 2026-11-20 | This plan, adversarial review requested by Adrian | Subagent (general-purpose, adversarial reviewer) | Blockers: (1) the budget didn't fit, because design time already used about 1 h 46 of the 3 h; (2) create-vite 9.3.4 ships Oxlint, not ESLint, and its rolldown prompt no longer exists. Should-fix: scaffold move skipped dotfiles and used stale template file names; jsdom 31 needs Node ≥ 24.15 (24.14 installed); the getJson test would trigger an unhandled rejection; T8 weaker than the spec says; cutting Task 6 would remove visible selection, and a `▸` text marker would break the button's accessible name; `const _x: never` fails `noUnusedLocals`; `strict` not visible in tsconfig. Nits: aria attributes only when an error exists; mock robustness; D-numbers in code snippets; "branch diff" on `main`; D25 untested; `ai-log` missing from Skills used. Versions checked against npm by the AI (create-vite 9.3.4, jsdom 31.0.1 engines, vitest 5.1.1, vite 8.3.8, typescript 7.0.2) | All applied. Adrian decided: design time counts (D46), keep Oxlint (D47), upgrade Node (D48). Fixes recorded as D49–D53 |
+| 2026-11-20 | Code `d33672f..HEAD` (all build commits) | `code-review` skill (medium) | No critical or important issues; the abort, retry, keyed-remount and POST-abort paths were traced with no race found. 6 nits:<br>1. `No users match ""` if `/users` returns `[]`<br>2. "+ New post" has `aria-expanded` but doesn't toggle closed<br>3. the "just added" tag is inside the post heading<br>4. the mock doesn't reject a signal that is already aborted<br>5. some tests query by text where `CLAUDE.md` asks for role/label<br>6. the POST error stays visible while editing | Recorded as deferred minors in the ledger; Adrian to decide whether to fix |
 
 ## Automated testing
 
@@ -428,7 +436,16 @@ Command: `npm test` (`vitest run`). Planned: 11 tests (after the D46 cuts). `api
 
 | Date | Command | Result (passed/failed/total) | Notes |
 |---|---|---|---|
-| | | | Not run yet |
+| 2026-11-20 | `npx vitest run src/api.test.ts` | 0/0 (suite failed to load) | Task 2 RED: `./api` didn't exist |
+| 2026-11-20 | `npx vitest run src/api.test.ts` | 2/0/2 | Task 2 GREEN (createPost + E1) |
+| 2026-11-20 | `npx vitest run src/users.test.tsx` | 0/6/6 | Task 3 RED |
+| 2026-11-20 | `npx vitest run src/users.test.tsx src/api.test.ts` | 7/1/8 | Task 3 GREEN except E4, which needs the posts panel (ruling in ledger) |
+| 2026-11-20 | `npx vitest run src/posts.test.tsx` | 1/4/5 | Task 4 RED (E6 already passed: `aria-pressed` was built in Task 3) |
+| 2026-11-20 | `npx vitest run` (posts, users, api) | 13/0/13 | Task 4 GREEN, E4 included |
+| 2026-11-20 | `npx vitest run src/newPost.test.tsx` | 0/14/14 | Task 5 RED |
+| 2026-11-20 | `npx vitest run` | 26/1/27 | E10 failed on the test's query (heading name includes "just added"); test fixed |
+| 2026-11-20 | `npx vitest run -t E10` with trimming removed | 0/1 | Mutation check: E10 catches untrimmed posts |
+| 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 27/0/27 | All green; build and lint clean |
 
 ## Manual testing
 
