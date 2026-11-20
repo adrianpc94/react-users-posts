@@ -1,0 +1,68 @@
+.users {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.users h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.search {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.search-label {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.user-list-item {
+  border-bottom: 1px solid var(--line);
+}
+
+.user-button {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.25rem;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.user-button:hover {
+  color: var(--action);
+}
+
+/* The selected user is marked like a highlighter stroke, plus weight and a
+   marker, so it never relies on colour alone. */
+.user-button[aria-pressed='true'] {
+  font-weight: 700;
+  background: linear-gradient(transparent 20%, var(--highlight) 20%, var(--highlight) 85%, transparent 85%);
+}
+
+/* Drawn with borders, not text: browsers include ::before text in a button's
+   accessible name, which would turn "Leanne Graham" into "▸ Leanne Graham". */
+.user-button[aria-pressed='true']::before {
+  content: '';
+  display: inline-block;
+  margin-right: 0.4rem;
+  border-block: 0.3rem solid transparent;
+  border-left: 0.4rem solid currentColor;
+}
+
+@media (max-width: 700px) {
+  .users {
+    position: static;
+  }
+}

@@ -57,3 +57,49 @@ textarea {
     transition: none !important;
   }
 }
+
+/* ---------- Shared controls ---------- */
+
+.button,
+.button-secondary {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button {
+  border: 1px solid var(--action);
+  background: var(--action);
+  color: var(--action-ink);
+}
+
+.button-secondary {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-weight: 400;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.input {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+[role='status'],
+.muted {
+  color: var(--muted);
+}

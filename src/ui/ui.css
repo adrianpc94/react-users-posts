@@ -1,0 +1,32 @@
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.field-error {
+  margin: 0 0 0.5rem;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+.error-with-retry {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background: var(--danger-bg);
+}
+
+.error-with-retry [role='alert'] {
+  margin: 0;
+  color: var(--danger);
+  font-weight: 600;
+}

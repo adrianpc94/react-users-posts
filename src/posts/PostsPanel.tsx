@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react';
 import type { CreatedPost, User } from '../api';
-import { NewPostForm } from './NewPostForm';
 import { useUserPosts } from '../hooks';
 import { assertNever } from '../requestState';
+import { ErrorWithRetry } from '../ui/ErrorWithRetry';
+import { NewPostForm } from './NewPostForm';
+import { PostList } from './PostList';
+import './posts.css';
 
 type PostsPanelProps = {
   user: User;
@@ -11,11 +14,14 @@ type PostsPanelProps = {
   onCreated: (post: CreatedPost) => void;
 };
 
+/**
+ * One user's posts and the new-post form. Render it with `key={user.id}` so
+ * switching users starts a fresh panel: new request, form closed.
+ */
 export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
   const { state, retry } = useUserPosts(user.id);
   const [formOpen, setFormOpen] = useState(false);
   const newPostButtonRef = useRef<HTMLButtonElement>(null);
-  const fetched = state.status === 'success' ? state.data : [];
 
   function closeForm() {
     setFormOpen(false);
@@ -29,6 +35,7 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
         <button
           ref={newPostButtonRef}
           type="button"
+          className="button"
           aria-expanded={formOpen}
           onClick={() => setFormOpen(true)}
         >
@@ -36,22 +43,7 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
         </button>
       </header>
       {formOpen ? <NewPostForm userId={user.id} onCreated={onCreated} onClose={closeForm} /> : null}
-      <ul className="post-list" aria-label="Posts">
-        {createdPosts.map((post) => (
-          <li key={post.localId}>
-            <h3>
-              {post.title} <span className="tag">just added</span>
-            </h3>
-            <p>{post.body}</p>
-          </li>
-        ))}
-        {fetched.map((post) => (
-          <li key={post.id}>
-            <h3>{post.title}</h3>
-            <p>{post.body}</p>
-          </li>
-        ))}
-      </ul>
+      <PostList created={createdPosts} fetched={state.status === 'success' ? state.data : []} />
       {renderStatus()}
     </section>
   );
@@ -61,16 +53,11 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
       case 'loading':
         return <p role="status">Loading posts…</p>;
       case 'error':
-        return (
-          <div className="error">
-            <p role="alert">Couldn't load posts.</p>
-            <button type="button" onClick={retry}>
-              Retry
-            </button>
-          </div>
-        );
+        return <ErrorWithRetry message="Couldn't load posts." onRetry={retry} />;
       case 'success':
-        return state.data.length === 0 && createdPosts.length === 0 ? <p>No posts yet.</p> : null;
+        return state.data.length === 0 && createdPosts.length === 0 ? (
+          <p className="muted">No posts yet.</p>
+        ) : null;
       default:
         return assertNever(state);
     }
