@@ -452,13 +452,13 @@ Command: `npm test` (`vitest run`). Planned: 11 tests (after the D46 cuts). `api
 | 2026-11-20 | `npx vitest run src/users.test.tsx src/api.test.ts` | 7/1/8 | Task 3 GREEN except E4, which needs the posts panel (ruling in ledger) |
 | 2026-11-20 | `npx vitest run src/posts.test.tsx` | 1/4/5 | Task 4 RED (E6 already passed: `aria-pressed` was built in Task 3) |
 | 2026-11-20 | `npx vitest run` (posts, users, api) | 13/0/13 | Task 4 GREEN, E4 included |
-| 2026-11-20 | `npx vitest run` after the modular refactor | 27/0/27 | No test changes needed |
-| 2026-11-20 | `npx vitest run` with new tests E15, E16, E17 and tightened E10 | 26/4/30 | RED: no toggle, no `aria-controls`, mock hangs on an already-aborted signal, heading included "just added" |
-| 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 30/0/30 | GREEN after the fixes and the role/label query switch; browser check clean |
 | 2026-11-20 | `npx vitest run src/newPost.test.tsx` | 0/14/14 | Task 5 RED |
 | 2026-11-20 | `npx vitest run` | 26/1/27 | E10 failed on the test's query (heading name includes "just added"); test fixed |
 | 2026-11-20 | `npx vitest run -t E10` with trimming removed | 0/1 | Mutation check: E10 catches untrimmed posts |
 | 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 27/0/27 | All green; build and lint clean |
+| 2026-11-20 | `npx vitest run` after the modular refactor | 27/0/27 | No test changes needed |
+| 2026-11-20 | `npx vitest run` with new tests E15, E16, E17 and tightened E10 | 26/4/30 | RED: no toggle, no `aria-controls`, mock hangs on an already-aborted signal, heading included "just added" |
+| 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 30/0/30 | GREEN after the fixes and the role/label query switch; browser check clean |
 
 ## Manual testing
 
