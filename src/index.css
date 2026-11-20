@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --paper: #edf1f4;
   --surface: #ffffff;
   --ink: #1b2a3a;
@@ -102,4 +103,42 @@ textarea {
 /* Live regions stay in the page even when empty; collapse them so they take no space. */
 .status:empty {
   margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+button,
+input,
+textarea,
+a {
+  touch-action: manipulation;
+}
+
+.button:hover:not(:disabled) {
+  background: #255a4c;
+  border-color: #255a4c;
+}
+
+.button-secondary:hover {
+  border-color: var(--ink);
+}
+
+/* Hidden until focused with the keyboard, then shown at the top-left. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--surface);
+  z-index: 1;
+}
+
+.skip-link:focus {
+  top: 1rem;
 }

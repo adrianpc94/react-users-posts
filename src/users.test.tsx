@@ -31,14 +31,15 @@ it('T2 filters by name ignoring case and surrounding spaces, and shows a no-matc
 
   await user.clear(search);
   await user.type(search, 'zzz');
-  expect(screen.getByRole('status')).toHaveTextContent('No users match "zzz"');
+  expect(screen.getByRole('status')).toHaveTextContent('No users match “zzz”');
 });
 
 it('T3 shows an error with Retry that reloads the users', async () => {
   const user = userEvent.setup();
   render(<App />);
   await api.fail('GET /users');
-  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load users.");
+  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn’t load users.");
+  expect(screen.getByRole('alert')).toHaveTextContent('Check your connection and try again.');
 
   await user.click(screen.getByRole('button', { name: 'Retry' }));
   expect(screen.getByRole('status')).toHaveTextContent('Loading users…');
@@ -65,7 +66,8 @@ it('E3 a Retry that fails again keeps the error and Retry', async () => {
   await api.fail('GET /users');
   await user.click(await screen.findByRole('button', { name: 'Retry' }));
   await api.fail('GET /users');
-  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load users.");
+  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn’t load users.");
+  expect(screen.getByRole('alert')).toHaveTextContent('Check your connection and try again.');
   expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 });
 
@@ -78,13 +80,14 @@ it('E4 a search that hides the selected user keeps the posts panel', async () =>
   await screen.findByRole('heading', { name: 'User 1 post A' });
   await user.type(screen.getByRole('searchbox', { name: 'Search users by name' }), 'ervin');
   expect(screen.queryByRole('button', { name: 'Leanne Graham' })).not.toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: "Leanne Graham’s posts" })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'User 1 post A' })).toBeInTheDocument();
 });
 
 it('E20 a network failure (no HTTP response) shows the error and Retry', async () => {
   render(<App />);
   await api.networkError('GET /users');
-  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load users.");
+  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn’t load users.");
+  expect(screen.getByRole('alert')).toHaveTextContent('Check your connection and try again.');
   expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 });

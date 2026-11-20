@@ -24,8 +24,8 @@ it('T4 selecting a user shows loading, then their posts', async () => {
 
   await user.click(screen.getByRole('button', { name: 'Leanne Graham' }));
   expect(screen.getByRole('button', { name: 'Leanne Graham' })).toHaveAttribute('aria-current', 'true');
-  expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
-  const postsRegion = screen.getByRole('region', { name: "Leanne Graham's posts" });
+  expect(screen.getByRole('heading', { name: "Leanne Graham’s posts" })).toBeInTheDocument();
+  const postsRegion = screen.getByRole('region', { name: "Leanne Graham’s posts" });
   expect(within(postsRegion).getByRole('status')).toHaveTextContent('Loading posts…');
   expect(screen.queryByRole('list', { name: 'Posts' })).not.toBeInTheDocument();
 
@@ -43,7 +43,7 @@ it('T8 switching users quickly shows only the latest user', async () => {
 
   await api.respond('GET /users/2/posts', postsFor(2));
   expect(await screen.findByRole('heading', { name: 'User 2 post A' })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: "Ervin Howell's posts" })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: "Ervin Howell’s posts" })).toBeInTheDocument();
   expect(screen.queryByRole('heading', { name: 'User 1 post A' })).not.toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   expect(api.calls('GET /users/1/posts')[0]?.signal?.aborted).toBe(true);
@@ -53,7 +53,7 @@ it('RF5 a failed posts load shows an error, still offers + New post, and Retry r
   const user = await renderWithUsers();
   await user.click(screen.getByRole('button', { name: 'Ervin Howell' }));
   await api.fail('GET /users/2/posts');
-  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load posts.");
+  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn’t load posts.");
   expect(screen.getByRole('button', { name: '+ New post' })).toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Retry' }));

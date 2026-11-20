@@ -47,7 +47,9 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
   return (
     <section className="posts" aria-labelledby={headingId}>
       <header className="posts-header">
-        <h2 id={headingId}>{user.name}'s posts</h2>
+        <h2 id={headingId}>
+          <span translate="no">{user.name}</span>’s posts
+        </h2>
         <button
           ref={newPostButtonRef}
           type="button"
@@ -68,7 +70,7 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
         {statusText(state, createdPosts.length > 0)}
       </p>
       {state.status === 'error' ? (
-        <ErrorWithRetry message="Couldn't load posts." onRetry={retry} />
+        <ErrorWithRetry message="Couldn’t load posts. Check your connection and try again." onRetry={retry} />
       ) : null}
     </section>
   );

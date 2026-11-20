@@ -24,7 +24,7 @@ function statusText(state: RequestState<User[]>, matches: readonly User[], query
     case 'error':
       return '';
     case 'success':
-      return matches.length === 0 ? `No users match "${query.trim()}"` : '';
+      return matches.length === 0 ? `No users match “${query.trim()}”` : '';
     default:
       return assertNever(state);
   }
@@ -44,6 +44,9 @@ export function UsersPanel({ state, onRetry, selectedUserId, onSelect }: UsersPa
         <span className="search-label">Search users by name</span>
         <input
           type="search"
+          name="search"
+          autoComplete="off"
+          spellCheck={false}
           className="input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -54,7 +57,7 @@ export function UsersPanel({ state, onRetry, selectedUserId, onSelect }: UsersPa
         {statusText(state, matches, query)}
       </p>
       {state.status === 'error' ? (
-        <ErrorWithRetry message="Couldn't load users." onRetry={onRetry} />
+        <ErrorWithRetry message="Couldn’t load users. Check your connection and try again." onRetry={onRetry} />
       ) : null}
       {matches.length > 0 ? (
         <UserList users={matches} selectedUserId={selectedUserId} onSelect={onSelect} />

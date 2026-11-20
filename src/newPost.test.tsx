@@ -73,7 +73,7 @@ it('T7 a failed POST keeps the text and re-enables the button', async () => {
   await api.fail('POST /posts');
 
   expect(await screen.findByRole('alert')).toHaveTextContent(
-    "Couldn't add the post. Your text is kept; try again.",
+    "Couldn’t add the post. Your text is kept; try again.",
   );
   expect(screen.getByRole('textbox', { name: 'Title' })).toHaveValue('My post');
   expect(screen.getByRole('button', { name: 'Add post' })).toBeEnabled();
@@ -194,7 +194,7 @@ it('E11 a post created after the posts failed to load is shown above the error',
   await addPost(user, 'My post', 'Hello');
   await api.respond('POST /posts', { id: 101 });
   expect(await screen.findByRole('heading', { name: 'My post' })).toBeInTheDocument();
-  expect(screen.getByRole('alert')).toHaveTextContent("Couldn't load posts.");
+  expect(screen.getByRole('alert')).toHaveTextContent("Couldn’t load posts.");
 });
 
 it('E12 a created post is shown only for its own user', async () => {
@@ -268,4 +268,16 @@ it('E21 Escape closes the form, discards the text and refocuses + New post', asy
   await user.keyboard('{Escape}');
   expect(screen.queryByRole('form', { name: 'New post' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: '+ New post' })).toHaveFocus();
+});
+
+it('E22 leaving the page with an unsent draft asks for confirmation; an empty form does not', async () => {
+  const user = await openFormFor('Leanne Graham', 1);
+  const leave = () => {
+    const event = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  expect(leave()).toBe(false);
+  await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Draft');
+  expect(leave()).toBe(true);
 });

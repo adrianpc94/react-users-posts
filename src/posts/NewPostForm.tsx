@@ -32,6 +32,8 @@ export function NewPostForm({ id, ...options }: NewPostFormProps) {
           <input
             ref={titleRef}
             className="input"
+            name="title"
+            autoComplete="off"
             autoFocus
             value={values.title}
             onChange={(e) => setField('title', e.target.value)}
@@ -45,6 +47,8 @@ export function NewPostForm({ id, ...options }: NewPostFormProps) {
           <textarea
             ref={bodyRef}
             className="input textarea"
+            name="body"
+            autoComplete="off"
             value={values.body}
             onChange={(e) => setField('body', e.target.value)}
             {...aria}
@@ -54,7 +58,7 @@ export function NewPostForm({ id, ...options }: NewPostFormProps) {
 
       {submit.status === 'error' ? (
         <p role="alert" className="form-error">
-          Couldn't add the post. Your text is kept; try again.
+          Couldn’t add the post. Your text is kept; try again.
         </p>
       ) : null}
 

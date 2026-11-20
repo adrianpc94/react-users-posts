@@ -41,6 +41,15 @@ export function useNewPostForm({ userId, onCreated, onClose }: Options) {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
+  // Leaving the page would lose an unsent draft: ask the browser to confirm first.
+  const hasDraft = values.title !== '' || values.body !== '';
+  useEffect(() => {
+    if (!hasDraft) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasDraft]);
+
   function setField(name: FieldName, value: string) {
     setValues((prev) => ({ ...prev, [name]: value }));
     // An error clears as soon as the field is fixed; new errors wait for submit.
