@@ -47,6 +47,27 @@ Cases the spec implies but T1–T8 don't exercise, most likely to bite first. Ea
 4. **RF4. Created posts across switches:** two created posts survive switching away and back, newest first. Its test was cut for time (D46); it is checked manually ("Created post persists", "Two creates").
 5. **RF5. Posts load failure:** shows `Couldn't load posts.`, "+ New post" is still offered, and Retry recovers (Task 4).
 
+### Edge-case tests (D54)
+
+Added at Adrian's request. RF4, getJson and Cancel are restored.
+
+| # | File | Edge case | Expected |
+|---|---|---|---|
+| E1 | api | `getJson` gets a non-OK response | Rejects (assertion attached before `fail`) |
+| E2 | users | Clearing the search | All users shown again |
+| E3 | users | Retry fails again | Error and Retry still shown |
+| E4 | users | Search hides the selected user | Posts panel stays (D17) |
+| E5 | posts | User with no posts | `No posts yet.` (D55) |
+| E6 | posts | Unselected users | `aria-pressed="false"` |
+| E7 | newPost | Only Body invalid | Focus goes to Body, Title has no error, `aria-describedby` only on Body |
+| E8 | newPost | Cancel during POST | POST aborted, nothing added, no error |
+| E9 | newPost | Retry after a failed POST | Second attempt adds the post |
+| E10 | newPost | Submitted values trimmed | `"  My post  "` shown as `My post` and sent trimmed (D41) |
+| E11 | newPost | Post created after the posts load failed | Shown above the error (D25, D29) |
+| E12 | newPost | Created post belongs to its user only | Not shown for another user |
+| E13 | newPost | Switching users closes the form | Form not open on return (D16) |
+| E14 | newPost | Enter in Title submits | Validation runs or POST is sent |
+
 ---
 
 ### Task 1: Scaffold (generated code only)
@@ -382,6 +403,8 @@ Continues the spec's numbering (D1–D34).
 | D51 | Exhaustive switches end in `assertNever(state)` | `const _x: never = state` | The local trips the template's `noUnusedLocals` and fails the build | AI (builder's call) |
 | D52 | Essential CSS (grid, visible selection via `::before`, focus outline) lives in Task 3, not in the cuttable styling task | Keep all CSS in Task 6 | Cutting Task 6 must not remove D6 (layout) or D30 (selection not by colour alone); a text marker in the button would break the accessible name | AI (builder's call) |
 | D53 | `nextLocalId()` lives in `src/api.ts` | Module counter inside `NewPostForm.tsx` | Component files export only components (Fast Refresh) | AI (builder's call) |
+| D54 | No tests dropped. Restore getJson, Cancel and RF4, and add a test for every edge case found (list E1–E14 below). Partly reverses D46; the build will overrun the 3-hour budget | Keep D46's cuts (11 tests) | Adrian wants thorough test coverage over the time limit | Adrian |
+| D55 | A user with no posts shows `No posts yet.` | Show an empty list | The spec is silent; an empty panel looks broken. Found while listing edge cases | AI (builder's call) |
 
 ## Skills used
 
