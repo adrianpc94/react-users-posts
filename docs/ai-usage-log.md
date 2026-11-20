@@ -50,3 +50,15 @@ Running log for the README's "How I used AI" section. Format and rules:
 - **Asked:** Adrian asked to check that no deprecated code is used, pointing at `FormEvent`.
 - **Accepted:** `FormEvent` was replaced with `SubmitEvent` in `useNewPostForm`. The AI then listed every `@deprecated` declaration in the libraries the app imports and compared that list with what the code uses; nothing else was deprecated. 30/30 tests pass; build and lint are clean.
 - **Corrected:** Adrian caught it. The AI had written the deprecated `FormEvent` in its own code and hadn't checked for deprecations.
+
+### 2026-11-20 Final adversarial review, exploratory testing and guidelines review
+- **Asked:** Adrian asked for an adversarial review of the finished product by a subagent, for all the tests to be re-checked, and for Playwright to be used to look for bugs. He then said not to skip anything for time.
+- **Accepted:**
+  - **Tests:** all 30 re-ran clean four times (no flakiness, no warnings).
+  - **Playwright** (private browser context) found every successful POST showing as cancelled in DevTools, long titles overflowing the page, and Escape not closing the form.
+  - **The review** found credibility issues (timeline, attribution, stale docs) and code issues: user buttons announced as toggles, an untested in-flight guard, untested offline failures, a stale send error, an empty list while loading, and status regions inserted pre-filled.
+  - **Fixes:** all fixed test-first (E18–E24, mutation check on E19), plus `noUncheckedIndexedAccess`, a tidier structure, a custom favicon, and the `web-design-guidelines` review (skip link, curly quotes, error next steps, input names, unsaved-draft warning, hover, theme-color and more). Three guideline rules were deliberately not applied, with reasons (D79). 37/37 tests; build, lint and browser checks are clean.
+- **Corrected:**
+  - **The AI's clock error:** it misread "CST" (Cuba Standard Time, UTC−5) as US Central and told Adrian 1 h 46 had passed at the plan review, when only 46 min had. Adrian's time-saving cuts (D46) were based on that wrong figure. Recorded as D68; the README now states the real timeline from git.
+  - **Attribution:** the README had said Adrian ran the manual checks; it now says the AI ran them with Playwright at his request.
+  - **A guideline the AI itself broke:** while applying the guidelines, the AI added `outline: none` on `main` (an anti-pattern they flag), noticed it, and removed it.

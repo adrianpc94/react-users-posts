@@ -6,7 +6,7 @@
 
 **Architecture:** Plain `fetch` behind one generic `useRequest<T>(url)` hook (abort on cleanup + `signal.aborted` guard) with thin `useUsers` / `useUserPosts` wrappers. `App` owns the selected user and the session's created posts; the posts panel is keyed by user id so it resets on every switch, and the form aborts its POST on unmount.
 
-**Tech Stack:** React 19, TypeScript 7 strict, Vite 8 (create-vite 9.3.4 `react-ts`), Oxlint, Vitest 5 + React Testing Library + user-event + jest-dom (jsdom 31), plain CSS, Node ≥ 24.15 (24.22.3 installed) / npm 11.
+**Tech Stack:** React 19, TypeScript 7 strict, Vite 8 (create-vite 9.3.4 `react-ts`), Oxlint, Vitest 5 + React Testing Library + user-event + jest-dom (jsdom 29), plain CSS, Node 24.14 / npm 11 (see D70; the original "jsdom 31, Node ≥ 24.15" was superseded).
 
 **Spec:** [`docs/superpowers/specs/2026-11-20-users-posts-design.md`](../specs/2026-11-20-users-posts-design.md) (approved). Read it alongside this plan; decision numbers D1–D34 refer to it.
 
@@ -27,7 +27,7 @@
 - **TypeScript skill rules applied:** discriminated unions for every multi-state value (`RequestState<T>`, the form's submit state); exhaustive `switch` ending in `default: return assertNever(state)` (a helper, because a `const _x: never` local trips `noUnusedLocals`); no branded ids (only one id kind flows through each prop; D38).
 - **React skill rules applied** (client-side only, per `CLAUDE.md`): `rerender-derived-state-no-effect` (search filter, selected user), `rerender-move-effect-to-event` (submit, retry and cancel live in handlers, not effects), `rerender-functional-setstate` (created posts, retry counter), `rerender-dependencies` (effects depend on primitives: `url`, `attempt`), `rendering-conditional-render` (ternaries, never `count && …`), `rerender-no-inline-components`, `bundle-barrel-imports` (no `index.ts` re-exports).
 - **Commits:** every task ends with a commit step, but per Adrian's standing rule **no commit is made until Adrian approves it**.
-- **Time budget** (D46): the 3 hours run from the initial commit (13:22 ET). Design used 1 h 46, which leaves **about 1 h 15** for the build, starting 15:10 ET:
+- **Time budget** (D46; its elapsed-time figures are wrong, see D68 — only 46 min had passed at this point): the 3 hours run from the initial commit (13:22 ET). Design used 1 h 46, which leaves **about 1 h 15** for the build, starting 15:10 ET:
   - Task 1: 10 min
   - Task 2: 15 min
   - Task 3: 15 min
@@ -378,6 +378,38 @@ it('RF2 switching users mid-POST aborts it and adds nothing', async () => {
 
 ---
 
+## Build rulings
+
+Copied from the execution ledger (`.superpowers/sdd/…/progress.md`, which is git-ignored) so they can be read here. Every "deferred" item below was fixed later (D63–D66, D74, D80).
+
+- Setup: Ruling: work on main, no worktree — the plan Adrian approved says the work is on main (code-review range d33672f..HEAD) — cost if wrong: history mixes with docs commits, easy to rebase later.
+- Setup: Ruling: per-task commits wait for Adrian's approval (standing rule overrides skill's continuous commits); ask once after Task 1 for approval covering the build — cost if wrong: one pause.
+- Setup: Ruling: final review = Task 7 `code-review` (medium) run inline; no reviewer subagent, because CLAUDE.md says inline/no subagents — cost if wrong: weaker review than a fresh reviewer; Adrian is told.
+- Task 1: Ruling: template README.md not copied (Task 7 writes the real one) — cost if wrong: none.
+- Task 1: Ruling: Node stays 24.14 for now — nvm download of 24.22.3 failed (Surfshark VPN resets downloads); jsdom engine check revisited in Task 2 — cost if wrong: EBADENGINE warning or jsdom runtime issue.
+- Task 1: Adrian approved committing at the end of each task without asking again.
+- Task 2: Ruling: Node stays 24.14 and jsdom is 29.1.1 (npm resolved it; supports 24.14) instead of upgrading Node — nvm download blocked by VPN — cost if wrong: none observed; README states Node 24.
+- Task 2: Ruling: added `react/exhaustive-deps: warn` to .oxlintrc.json — hooks dependency mistakes are the likeliest React bug here; one line — cost if wrong: an extra warning.
+- Task 2: Ruling: Adrian (D54) restored the cut tests and asked for all edge cases; tests E1–E14 added to the plan and test files (27 total).
+- Task 3: Ruling: E4 (search hides selected user) committed red; it needs the posts panel and turns green in Task 4 — cost if wrong: one red test between commits.
+- Task 4: Ruling: E6 (aria-pressed false) passed before Task 4 code — the behaviour was built in Task 3; test kept as a regression guard — cost if wrong: none.
+- Task 5: Ruling: E10's heading query fixed (the "just added" tag is inside the h3, so its accessible name is "My post just added"); now asserts exact text with whitespace preserved; mutation check (trimming removed) made E10 fail — cost if wrong: none.
+- Task 5: Ruling: "No posts yet." shown only when the fetched list and the created posts are both empty (D55) — cost if wrong: message hidden while a created post exists, which is correct.
+- Final review: code-review (medium) on d33672f..HEAD, run inline as the plan's Task 7 Step 2 — 0 critical/important, 6 nits.
+- Final: minor (deferred): UserList shows 'No users match ""' if /users returns [] (API never does).
+- Final: minor (deferred): "+ New post" has aria-expanded but doesn't toggle closed; no aria-controls.
+- Final: minor (deferred): "just added" tag inside the h3 makes the heading's accessible name include it.
+- Final: minor (deferred): mockFetch doesn't reject an already-aborted signal immediately.
+- Final: minor (deferred): some tests use getByText (errors, loading text) where CLAUDE.md asks for role/label queries.
+- Final: minor (deferred): POST error alert stays visible while the user edits, until the next submit.
+- Task 6: Ruling: D52's ::before text marker changed the accessible name in real browsers; replaced with a border triangle (D56) — verified in a Playwright snapshot — cost if wrong: none.
+- Final: fixed "+ New post" toggle + aria-controls — E15, E16 RED→GREEN, suite 30/30
+- Final: fixed "just added" inside the heading — E10 (now exact heading name) RED→GREEN, suite 30/30
+- Final: fixed mock ignoring already-aborted signals — E17 RED (5 s timeout)→GREEN, suite 30/30
+- Final: fixed text queries → role/label (errors via accessible description, status role, post headings) — test-only refactor, suite 30/30
+- Final: Ruling: four text queries kept ("Select a user…", "No posts yet.", "just added" ×2) — plain text with no role or label; Testing Library allows text for non-interactive content — cost if wrong: none.
+- Final: minor (deferred, Adrian's call): 'No users match ""' on an empty /users response; POST error stays visible while editing.
+
 ## Decisions
 
 Continues the spec's numbering (D1–D34).
@@ -417,6 +449,19 @@ Continues the spec's numbering (D1–D34).
 | D65 | Tests query by role or label: field errors through the accessible description, messages through `role="status"`, posts through their heading. Four text queries remain for plain text with no role | Keep `getByText` | `CLAUDE.md` rule; the description checks also prove that each error is linked to its field (code review) | AI proposal accepted by Adrian |
 | D66 | Two review nits left open: a message for an empty `/users` response, and clearing the POST error on edit | Fix them too | The API never returns an empty list; the error clears on the next submit. Listed in the README under "more time" | AI proposal accepted by Adrian |
 | D67 | Form submit handler typed with `SubmitEvent<HTMLFormElement>`, not `FormEvent` | Keep `FormEvent` | `@types/react` 19.3 marks `FormEvent` deprecated ("doesn't actually exist"). A scan of every API used against the `@deprecated` markers in React, react-dom, Testing Library, user-event, jest-dom and Vitest found no other deprecated use | Adrian |
+| D68 | **Timeline correction:** at the plan review (14:08) only 46 min had passed, not 1 h 46. The 3 hours ran to 16:22; the whole job took about 2 h 30 (13:22–15:50). D46's premise and D44/D46's budget figures were wrong | (no alternative: a factual correction) | The AI misread the machine's time zone label "CST" (Cuba Standard Time, UTC−5) as US Central and added an hour. Found by the final adversarial review; verified against `git log` and Windows' time zone setting | AI (builder's call) |
+| D69 | Nothing is cut for time; every finding gets fixed or a recorded decision | Cut the optional items | Adrian: "don't skip something for the time" | Adrian |
+| D70 | Node 24.14 and jsdom 29.1.1 (supersedes D48's "Node ≥ 24.15, jsdom 31") | Upgrade Node to 24.22.3 | The nvm download was blocked by the VPN; npm resolved jsdom 29, which supports Node 24.14, so no upgrade was needed. The README says "tested on Node 24.14" | AI (builder's call) |
+| D71 | User buttons marked with `aria-current="true"` (replaces `aria-pressed` from D30) | Keep `aria-pressed` and make a second press deselect | `aria-pressed` announced a toggle that never toggled; the same defect D63 fixed for "+ New post" | AI proposal accepted by Adrian |
+| D72 | A request that already succeeded is not cancelled when the form closes | Read the response body before closing | Every successful POST showed as `ERR_ABORTED` in DevTools (Playwright exploration) | AI proposal accepted by Adrian |
+| D73 | Long unbroken words wrap (`overflow-wrap: anywhere`) in post titles, bodies, the posts heading and user names | Truncate with an ellipsis | A long title overflowed the page sideways (Playwright exploration); wrapping keeps the whole text readable | AI proposal accepted by Adrian |
+| D74 | A new submit or any edit clears a previous send error; Escape closes the form like Cancel; closing with "+ New post" also discards the draft (consistent with D16) | Keep the error until the next success; keep a draft when the toggle closes the form | The old error looked current next to new field errors (adversarial review). One rule for every way of closing the form: unsent text is discarded, and leaving the page warns first (D78) | AI proposal accepted by Adrian |
+| D75 | Status messages live in always-present `role="status"` regions; no empty "Posts" list while loading | Insert the status element only when there's a message | Screen readers reliably announce changes only in a live region that already exists | AI proposal accepted by Adrian |
+| D76 | Tests: E18–E24 added; the mock gains `networkError()` (a request with no HTTP response); `noUncheckedIndexedAccess` turned on; two unprefixed tests named A1 and C1 | Leave as is | The final review showed the in-flight guard was untested and offline failures weren't exercised; the stricter index typing found nothing in app code | AI proposal accepted by Adrian |
+| D77 | Structure tidy: `useRequest.ts` at the root, `useUsers` in `users/`, `useUserPosts` and `localId` in `posts/` (supersedes D53); internal types no longer exported; generated heading ids; a custom favicon | Keep the earlier layout | Each hook lives with its feature; nothing exported that nobody imports | AI proposal accepted by Adrian |
+| D78 | Web interface guidelines fixes: skip link; curly quotes and a next step in error copy (revises the spec's exact copy); input `name` and `autocomplete="off"`; warn before leaving with an unsent draft; hover states; `touch-action: manipulation`; `text-wrap: balance`; `color-scheme` and `theme-color`; preconnect to the API; person names `translate="no"` | Skip the review (cut in D46) | `CLAUDE.md` requires one guidelines review before submitting | AI proposal accepted by Adrian |
+| D79 | Guideline items not applied: Title Case (the copy is sentence case, as the spec and the `frontend-design` style use); a spinner while sending ("Adding…" on a disabled button says more); `autoFocus` kept (it runs only right after the user opens the form). URL state is listed under "more time" and left for Adrian to decide | Apply every rule literally | Each conflicts with a recorded choice or adds a feature the brief doesn't ask for | AI (builder's call) |
+| D80 | An empty users response says `No users found.` | `No users match ""` | The last open code-review nit | AI proposal accepted by Adrian |
 
 ## Skills used
 
@@ -431,6 +476,9 @@ Continues the spec's numbering (D1–D34).
 | `typescript-best-practices` | Tasks 2–5 | Discriminated unions (`RequestState`, `SubmitState`), `assertNever` |
 | `vercel-react-best-practices` | Tasks 3–5 | Search derived in render; submit/retry/cancel in handlers; functional updates; keyed remount |
 | `code-review` (medium) | Task 7 | Final review of `d33672f..HEAD` |
+| `frontend-design` | Task 6 (styling pass, D57) | Palette, type and layout plan; checked against generic defaults before building |
+| `web-design-guidelines` | Before submit | One guidelines review of the UI files (D78, D79) |
+| `superpowers:verification-before-completion` | Throughout | Tests, build, lint and a browser check before every completion claim |
 
 ## Reviews
 
@@ -440,17 +488,21 @@ Continues the spec's numbering (D1–D34).
 | 2026-11-20 | This plan, adversarial review requested by Adrian | Subagent (general-purpose, adversarial reviewer) | Blockers: (1) the budget didn't fit, because design time already used about 1 h 46 of the 3 h; (2) create-vite 9.3.4 ships Oxlint, not ESLint, and its rolldown prompt no longer exists. Should-fix: scaffold move skipped dotfiles and used stale template file names; jsdom 31 needs Node ≥ 24.15 (24.14 installed); the getJson test would trigger an unhandled rejection; T8 weaker than the spec says; cutting Task 6 would remove visible selection, and a `▸` text marker would break the button's accessible name; `const _x: never` fails `noUnusedLocals`; `strict` not visible in tsconfig. Nits: aria attributes only when an error exists; mock robustness; D-numbers in code snippets; "branch diff" on `main`; D25 untested; `ai-log` missing from Skills used. Versions checked against npm by the AI (create-vite 9.3.4, jsdom 31.0.1 engines, vitest 5.1.1, vite 8.3.8, typescript 7.0.2) | All applied. Adrian decided: design time counts (D46), keep Oxlint (D47), upgrade Node (D48). Fixes recorded as D49–D53 |
 | 2026-11-20 | Code `d33672f..HEAD` (all build commits) | `code-review` skill (medium) | No critical or important issues; the abort, retry, keyed-remount and POST-abort paths were traced with no race found. 6 nits:<br>1. `No users match ""` if `/users` returns `[]`<br>2. "+ New post" has `aria-expanded` but doesn't toggle closed<br>3. the "just added" tag is inside the post heading<br>4. the mock doesn't reject a signal that is already aborted<br>5. some tests query by text where `CLAUDE.md` asks for role/label<br>6. the POST error stays visible while editing | Recorded as deferred minors in the ledger; Adrian to decide whether to fix |
 | 2026-11-20 | Component structure (modularity), requested by Adrian | Subagent (general-purpose, read-only) | Proposed a feature-folder tree. Six "do" refactors: `useNewPostForm`, `ErrorWithRetry`, `PostItem` / `PostList`, split `UserList`, `Field`, `useCreatedPosts`. Optional: feature folders and explicit per-feature CSS. A "don't split" list. Risks: keyed remount, abort on unmount, focus refs, the error outside `<label>`, the E10 exact heading text, CSS failing silently in jsdom | Adrian: "do it". Applied 1–8 (D58–D62); 27/27 tests, build, lint and a browser check all green |
+| 2026-11-20 | Follow-up on the `code-review` nits above | Adrian | Asked to fix 2–5 | Fixed (D63–D65); 6 left open in D66, then fixed too (E24, D74); 1 fixed in D80 |
+| 2026-11-20 | Finished product, adversarial review requested by Adrian | Subagent (general-purpose, read-only) | Credibility: the timeline didn't match git (the AI's time zone error); the README said Adrian ran the manual checks; stale decision ranges and CSS wording; D48 never closed; "How I used AI" softer than the log; `web-design-guidelines` never run; the ledger cited but git-ignored. Code: user buttons announced as toggles that don't toggle; the in-flight guard untested; offline failures untested; a stale send error; an empty list rendered while loading; status regions inserted pre-filled. Tidiness items. Held up: R1–R5 met, request handling sound, types clean, tests mostly sensitive | Adrian: fix everything, nothing cut for time (D69). Applied as D68–D80; the ledger's rulings are copied into "Build rulings" below |
+| 2026-11-20 | Exploratory testing in a real browser, requested by Adrian | AI via Playwright (private browser context) | Every successful POST showed as cancelled; long titles overflowed the page; Escape didn't close the form. Held up: StrictMode double effect, re-clicking a user, a real double-click (1 POST), HTML in a title shown as text, short screens, 320px width | Fixed (D72–D74), re-verified in the browser |
+| 2026-11-20 | UI files against the Web Interface Guidelines | `web-design-guidelines` skill | Missing skip link, theme-color, preconnect, `color-scheme`; straight quotes; errors without a next step; inputs without `name` / `autocomplete`; no unsaved-draft warning; no hover on buttons; no `touch-action`; headings without `text-wrap: balance`; names without `translate="no"` | Fixed (D78); three rules deliberately not applied (D79); verified in the browser |
 
 ## Automated testing
 
-Command: `npm test` (`vitest run`). Final count: 30 tests. `api.test.ts` 3 (createPost, E1, E17); `users.test.tsx` 6 (T1–T3, E2–E4); `posts.test.tsx` 5 (T4, T8, RF5, E5, E6); `newPost.test.tsx` 16 (T5–T7, RF2, RF4, Cancel, E7–E16). The 11 planned after the D46 cuts grew to 30 with D54 and the code-review fixes.
+Command: `npm test` (`vitest run`). Final count: 37 tests. `api.test.ts` 3 (A1, E1, E17); `users.test.tsx` 8 (T1–T3, E2–E4, E20, E23); `posts.test.tsx` 5 (T4, T8, RF5, E5, E6); `newPost.test.tsx` 21 (T5–T7, RF2, RF4, C1, E7–E16, E18, E19, E21, E22, E24). The 11 planned after the D46 cuts grew to 37 with D54, the code-review fixes and the final review.
 
 | Date | Command | Result (passed/failed/total) | Notes |
 |---|---|---|---|
 | 2026-11-20 | `npx vitest run src/api.test.ts` | 0/0 (suite failed to load) | Task 2 RED: `./api` didn't exist |
 | 2026-11-20 | `npx vitest run src/api.test.ts` | 2/0/2 | Task 2 GREEN (createPost + E1) |
 | 2026-11-20 | `npx vitest run src/users.test.tsx` | 0/6/6 | Task 3 RED |
-| 2026-11-20 | `npx vitest run src/users.test.tsx src/api.test.ts` | 7/1/8 | Task 3 GREEN except E4, which needs the posts panel (ruling in ledger) |
+| 2026-11-20 | `npx vitest run src/users.test.tsx src/api.test.ts` | 7/1/8 | Task 3 GREEN except E4, which needs the posts panel (see Build rulings) |
 | 2026-11-20 | `npx vitest run src/posts.test.tsx` | 1/4/5 | Task 4 RED (E6 already passed: `aria-pressed` was built in Task 3) |
 | 2026-11-20 | `npx vitest run` (posts, users, api) | 13/0/13 | Task 4 GREEN, E4 included |
 | 2026-11-20 | `npx vitest run src/newPost.test.tsx` | 0/14/14 | Task 5 RED |
@@ -460,6 +512,17 @@ Command: `npm test` (`vitest run`). Final count: 30 tests. `api.test.ts` 3 (crea
 | 2026-11-20 | `npx vitest run` after the modular refactor | 27/0/27 | No test changes needed |
 | 2026-11-20 | `npx vitest run` with new tests E15, E16, E17 and tightened E10 | 26/4/30 | RED: no toggle, no `aria-controls`, mock hangs on an already-aborted signal, heading included "just added" |
 | 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 30/0/30 | GREEN after the fixes and the role/label query switch; browser check clean |
+| 2026-11-20 | `npx vitest run` + build + lint after `FormEvent` → `SubmitEvent` | 30/0/30 | Clean |
+| 2026-11-20 | `npx vitest run --reporter=verbose`, then 3 more full runs | 30/0/30 ×4 | No flaky tests; no warnings in the output |
+| 2026-11-20 | `npx vitest run` with E18–E21 and tightened T4, T6, E6 | 28/6/34 | RED: no `aria-current`, empty list while loading, mock lacked `networkError`, finished POST cancelled, stale alert, Escape ignored. E19 passed at once (the guard existed) |
+| 2026-11-20 | `npx vitest run` | 34/0/34 | GREEN after the fixes |
+| 2026-11-20 | `npx vitest run -t E19` with the in-flight guard removed | 0/1 | Mutation check: E19 catches a second submit |
+| 2026-11-20 | `npx vitest run` after the persistent status regions | 32/2/34 | T1 and T4 assumed the status element disappears; updated to the new intended behaviour, then 34/34 |
+| 2026-11-20 | `npx tsc -b` with `noUncheckedIndexedAccess` | 6 errors, all in tests | Fixed with `?.`; app code had none |
+| 2026-11-20 | `npx vitest run` with the guidelines copy and E22 | 24/11/35 | RED: curly quotes, error next steps, beforeunload |
+| 2026-11-20 | `npx vitest run` + build + lint | 35/0/35 | GREEN; browser check clean |
+| 2026-11-20 | `npx vitest run` with E23, E24 | 35/2/37 | RED: empty users said "No users match", editing kept the send error |
+| 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 37/0/37 | Final: all green |
 
 ## Manual testing
 
@@ -479,5 +542,14 @@ Scenarios, steps and expected results are in the spec's Manual testing table; re
 | Switch on slow network | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
 | Narrow screen | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
 | Keyboard | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Dev double effect on load | Load the app in dev (StrictMode) | Duplicate request cancelled, no error flash | Pass | AI via Playwright (private context) | 2026-11-20 |
+| Re-click the selected user | Click the selected user again | No new request | Pass | AI via Playwright (private context) | 2026-11-20 |
+| Real double-click on Add post | Fill the form, double-click Add post | 1 POST, post shown once | Pass | AI via Playwright (private context) | 2026-11-20 |
+| HTML in a title | Title `<img src=x onerror=alert(1)>` | Shown as text, nothing runs | Pass | AI via Playwright (private context) | 2026-11-20 |
+| Long unbroken title | 200-character word as title | Wraps, no sideways scroll | Fail, then Pass after D73 | AI via Playwright (private context) | 2026-11-20 |
+| Network panel after a post | Add a post, check failed requests | No cancelled POST | Fail, then Pass after D72 | AI via Playwright (private context) | 2026-11-20 |
+| Short and very narrow screens | 1280×520 and 320×640 | Every user reachable, no sideways scroll | Pass | AI via Playwright (private context) | 2026-11-20 |
+| Escape on the form | Open the form, press Escape | Form closes, focus on "+ New post" | Fail, then Pass after D74 | AI via Playwright (private context) | 2026-11-20 |
+| Skip link and leave-page warning | Tab once, follow the link; reload with a draft | Link visible on focus, focus moves into main; browser asks to confirm | Pass | AI via Playwright (private context) | 2026-11-20 |
 
 How the checks were run: Playwright drove Chrome against the dev server and the live API. For check 8 and check 9, request blocking used `page.route(…, abort)` instead of DevTools. For check 10, one user's posts were delayed by 3 s with `page.route` (instead of "Slow 3G") while the AI clicked through two other users; only the last user's posts showed and no alert appeared. Check 7: no warnings or errors in the console.

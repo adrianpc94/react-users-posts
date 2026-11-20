@@ -1,6 +1,8 @@
 # Users & Posts: design
 
 Date: 2026-11-20 · Status: approved by Adrian (2026-11-20, asked to proceed to the implementation plan)
+
+> Later changes are recorded in the implementation plan (D35–D80). Notably the exact UI copy below was revised by D78 (curly quotes, a next step in error messages) and D80 ("No users found."), and the selected user uses `aria-current` instead of `aria-pressed` (D71).
 Brief and requirement checklist: [`docs/assignment.md`](../../assignment.md)
 
 ## Intent
