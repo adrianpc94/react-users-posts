@@ -25,10 +25,10 @@ it('T4 selecting a user shows loading, then their posts', async () => {
   await user.click(screen.getByRole('button', { name: 'Leanne Graham' }));
   expect(screen.getByRole('button', { name: 'Leanne Graham' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
-  expect(screen.getByText('Loading posts…')).toHaveAttribute('role', 'status');
+  expect(screen.getByRole('status')).toHaveTextContent('Loading posts…');
 
   await api.respond('GET /users/1/posts', postsFor(1));
-  expect(await screen.findByText('User 1 post A')).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'User 1 post A' })).toBeInTheDocument();
 });
 
 // T8 asserts the abort and the absence of an error. A "late A response" cannot
@@ -40,9 +40,9 @@ it('T8 switching users quickly shows only the latest user', async () => {
   await user.click(screen.getByRole('button', { name: 'Ervin Howell' }));
 
   await api.respond('GET /users/2/posts', postsFor(2));
-  expect(await screen.findByText('User 2 post A')).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'User 2 post A' })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: "Ervin Howell's posts" })).toBeInTheDocument();
-  expect(screen.queryByText('User 1 post A')).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'User 1 post A' })).not.toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   expect(api.calls('GET /users/1/posts')[0].signal?.aborted).toBe(true);
 });
@@ -56,7 +56,7 @@ it('RF5 a failed posts load shows an error, still offers + New post, and Retry r
 
   await user.click(screen.getByRole('button', { name: 'Retry' }));
   await api.respond('GET /users/2/posts', postsFor(2));
-  expect(await screen.findByText('User 2 post A')).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'User 2 post A' })).toBeInTheDocument();
 });
 
 it('E5 a user with no posts shows "No posts yet."', async () => {

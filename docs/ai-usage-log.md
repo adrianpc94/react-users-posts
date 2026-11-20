@@ -40,3 +40,8 @@ Running log for the README's "How I used AI" section. Format and rules:
 - **Asked:** Adrian asked the AI to run the 12 manual checks with Playwright, and to make the app "very modular in components" using a subagent to find improvements.
 - **Accepted:** All 12 manual checks passed in real Chrome against the live API. They are recorded as "AI via Playwright", not as checked by Adrian. From the subagent review, refactors 1–8 were applied (D58–D62): feature folders; `useNewPostForm` and `useCreatedPosts` hooks; shared `ErrorWithRetry` and `Field`; `PostItem` / `PostList`; `UsersPanel` split from `UserList`; explicit classes and per-feature CSS. The 27 tests stayed green with no changes.
 - **Corrected:** The reviewer's "don't split" list was followed: no generic loading, header, search or async wrappers. The CSS moves were checked in the browser, because jsdom can't catch CSS problems.
+
+### 2026-11-20 Code-review fixes
+- **Asked:** Adrian approved fixing four of the six minor code-review findings.
+- **Accepted:** Each fix was test-first. "+ New post" now toggles the form and points at it with `aria-controls` (new tests E15, E16). "just added" moved out of the post heading (E10 tightened to an exact heading name). The `fetch` mock rejects a request that is already cancelled (E17). Tests query by role or label: field errors through their accessible description, loading and no-match messages through `role="status"`, posts through their heading. 30/30 tests pass; build, lint and a browser check are clean.
+- **Corrected:** Nothing from Adrian. The AI kept four text queries for plain text that has no role or label, and recorded why.

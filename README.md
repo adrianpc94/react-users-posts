@@ -11,7 +11,7 @@ Requires **Node 24** (developed on 24.14) and npm 11.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 27 tests (Vitest + React Testing Library)
+npm test           # 30 tests (Vitest + React Testing Library)
 npm run build      # type-check (strict) + production build
 npm run lint       # Oxlint
 ```
@@ -98,7 +98,7 @@ full records are in the
 - **Time:** the brief allows 3 hours, and I counted design time against it.
   With about 1 h 15 left after design, I first cut three tests and the
   styling pass. I then chose to restore every test, add edge-case tests
-  (27 in total) and do the styling pass, knowingly going over the limit.
+  (30 in total) and do the styling pass, knowingly going over the limit.
 
 ## What I'd do with more time
 
@@ -109,9 +109,9 @@ full records are in the
 - Keep the selected user in the URL, so it survives a reload and can be shared.
 - Show a new post immediately, before the server confirms it (optimistic update).
 - One end-to-end test in a real browser (Playwright) against the live API.
-- The minor points from the final code review, listed in the plan's
-  Reviews table: for example, making "+ New post" also close the form, and
-  moving the "just added" tag out of the post heading.
+- The two minor code-review points left open: a clearer message if the API
+  ever returned no users, and clearing the "couldn't add the post" error as
+  soon as you edit the form.
 
 ## How I used AI
 

@@ -16,7 +16,7 @@ async function openFormFor(name: string, userId: number): Promise<UserEvent> {
   await api.respond('GET /users', users);
   await user.click(await screen.findByRole('button', { name }));
   await api.respond(`GET /users/${userId}/posts`, postsFor(userId));
-  await screen.findByText(`User ${userId} post A`);
+  await screen.findByRole('heading', { name: `User ${userId} post A` });
   await user.click(screen.getByRole('button', { name: '+ New post' }));
   return user;
 }
@@ -33,17 +33,17 @@ it('T5 empty or blank fields show both errors and send nothing', async () => {
   expect(title).toHaveFocus();
 
   await user.click(screen.getByRole('button', { name: 'Add post' }));
-  expect(screen.getByText('Title is required')).toBeInTheDocument();
-  expect(screen.getByText('Body is required')).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Title' })).toHaveAccessibleDescription('Title is required');
+  expect(screen.getByRole('textbox', { name: 'Body' })).toHaveAccessibleDescription('Body is required');
   expect(title).toHaveAttribute('aria-invalid', 'true');
   expect(title).toHaveFocus();
 
   await addPost(user, '   ', '   ');
-  expect(screen.getByText('Title is required')).toBeInTheDocument();
-  expect(screen.getByText('Body is required')).toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Title' })).toHaveAccessibleDescription('Title is required');
+  expect(screen.getByRole('textbox', { name: 'Body' })).toHaveAccessibleDescription('Body is required');
 
   await user.type(title, 'Hi');
-  expect(screen.queryByText('Title is required')).not.toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Title' })).not.toHaveAccessibleDescription();
   expect(api.calls('POST /posts')).toHaveLength(0);
 });
 
@@ -82,20 +82,20 @@ it('RF2 switching users mid-POST aborts it and adds nothing', async () => {
 
   await user.click(screen.getByRole('button', { name: 'Ervin Howell' }));
   await api.respond('GET /users/2/posts', postsFor(2));
-  await screen.findByText('User 2 post A');
+  await screen.findByRole('heading', { name: 'User 2 post A' });
   expect(api.calls('POST /posts')[0].signal?.aborted).toBe(true);
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Leanne Graham' }));
   await api.respond('GET /users/1/posts', postsFor(1));
-  await screen.findByText('User 1 post A');
+  await screen.findByRole('heading', { name: 'User 1 post A' });
   expect(screen.queryByText('just added')).not.toBeInTheDocument();
 });
 
 async function switchTo(user: UserEvent, name: string, userId: number) {
   await user.click(screen.getByRole('button', { name }));
   await api.respond(`GET /users/${userId}/posts`, postsFor(userId));
-  await screen.findByText(`User ${userId} post A`);
+  await screen.findByRole('heading', { name: `User ${userId} post A` });
 }
 
 function postItems() {
@@ -109,7 +109,7 @@ it('RF4 created posts survive switching users, newest first', async () => {
   await user.click(await screen.findByRole('button', { name: '+ New post' }));
   await addPost(user, 'Second', 'b');
   await api.respond('POST /posts', { id: 101 });
-  await screen.findByText('Second');
+  await screen.findByRole('heading', { name: 'Second' });
 
   await switchTo(user, 'Ervin Howell', 2);
   await switchTo(user, 'Leanne Graham', 1);
@@ -140,7 +140,7 @@ it('E7 when only Body is invalid, focus and error go to Body alone', async () =>
   expect(body).toHaveAccessibleDescription('Body is required');
   expect(title).not.toHaveAttribute('aria-invalid');
   expect(title).not.toHaveAttribute('aria-describedby');
-  expect(screen.queryByText('Title is required')).not.toBeInTheDocument();
+  expect(screen.getByRole('textbox', { name: 'Title' })).not.toHaveAccessibleDescription();
 });
 
 it('E8 Cancel during sending aborts the POST and adds nothing', async () => {
@@ -148,7 +148,7 @@ it('E8 Cancel during sending aborts the POST and adds nothing', async () => {
   await addPost(user, 'My post', 'Hello');
   await user.click(screen.getByRole('button', { name: 'Cancel' }));
   expect(api.calls('POST /posts')[0].signal?.aborted).toBe(true);
-  expect(screen.queryByText('My post')).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'My post' })).not.toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 
@@ -158,7 +158,7 @@ it('E9 retrying after a failed POST adds the post', async () => {
   await api.fail('POST /posts');
   await user.click(await screen.findByRole('button', { name: 'Add post' }));
   await api.respond('POST /posts', { id: 101 });
-  expect(await screen.findByText('My post')).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'My post' })).toBeInTheDocument();
   expect(api.calls('POST /posts')).toHaveLength(2);
 });
 
@@ -171,10 +171,13 @@ it('E10 submitted values are trimmed when sent and shown', async () => {
     body: 'Hello',
   });
   await api.respond('POST /posts', { id: 101 });
-  await screen.findByText('just added');
-  expect(within(postItems()[0]).getByRole('heading')).toHaveTextContent(/^My post just added$/, {
-    normalizeWhitespace: false,
-  });
+  const heading = await within(await screen.findByRole('list', { name: 'Posts' })).findByRole(
+    'heading',
+    { name: 'My post' },
+  );
+  // Exact text, spaces preserved: the heading holds the trimmed title and nothing else.
+  expect(heading).toHaveTextContent(/^My post$/, { normalizeWhitespace: false });
+  expect(postItems()[0]).toHaveTextContent('just added');
 });
 
 it('E11 a post created after the posts failed to load is shown above the error', async () => {
@@ -187,7 +190,7 @@ it('E11 a post created after the posts failed to load is shown above the error',
   await user.click(screen.getByRole('button', { name: '+ New post' }));
   await addPost(user, 'My post', 'Hello');
   await api.respond('POST /posts', { id: 101 });
-  expect(await screen.findByText('My post')).toBeInTheDocument();
+  expect(await screen.findByRole('heading', { name: 'My post' })).toBeInTheDocument();
   expect(screen.getByRole('alert')).toHaveTextContent("Couldn't load posts.");
 });
 
@@ -195,9 +198,9 @@ it('E12 a created post is shown only for its own user', async () => {
   const user = await openFormFor('Leanne Graham', 1);
   await addPost(user, 'My post', 'Hello');
   await api.respond('POST /posts', { id: 101 });
-  await screen.findByText('My post');
+  await screen.findByRole('heading', { name: 'My post' });
   await switchTo(user, 'Ervin Howell', 2);
-  expect(screen.queryByText('My post')).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'My post' })).not.toBeInTheDocument();
   expect(screen.queryByText('just added')).not.toBeInTheDocument();
 });
 
@@ -215,4 +218,22 @@ it('E14 pressing Enter in Title submits the form', async () => {
   await user.type(screen.getByRole('textbox', { name: 'Body' }), 'Hello');
   await user.type(screen.getByRole('textbox', { name: 'Title' }), 'My post{Enter}');
   expect(api.calls('POST /posts')).toHaveLength(1);
+});
+
+it('E15 + New post toggles the form closed again', async () => {
+  const user = await openFormFor('Leanne Graham', 1);
+  const toggle = screen.getByRole('button', { name: '+ New post' });
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+  await user.click(toggle);
+  expect(screen.queryByRole('form', { name: 'New post' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('textbox', { name: 'Title' })).not.toBeInTheDocument();
+  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  expect(toggle).toHaveFocus();
+});
+
+it('E16 the form is a named region the toggle controls', async () => {
+  await openFormFor('Leanne Graham', 1);
+  const form = screen.getByRole('form', { name: 'New post' });
+  expect(screen.getByRole('button', { name: '+ New post' })).toHaveAttribute('aria-controls', form.id);
 });

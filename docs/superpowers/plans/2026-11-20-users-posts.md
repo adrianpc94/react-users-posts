@@ -412,6 +412,10 @@ Continues the spec's numbering (D1–D34).
 | D60 | One `ErrorWithRetry`, one `PostItem` / `PostList`, and `UserList` split from `UsersPanel` | Separate `Loading`, `PostsHeader`, `UserSearch` or generic async wrappers | Real reuse or a single job per file; the reviewer advised against the other splits as indirection without reuse | AI proposal accepted by Adrian |
 | D61 | `Field` renders the label, the control (render prop) and the error, with `useId` ids; the error stays outside the `<label>` | Hard-coded `title-error` / `body-error` ids | Unique ids, and the field's accessible name stays "Title" / "Body" | AI proposal accepted by Adrian |
 | D62 | Explicit class names (`.button`, `.button-secondary`, `.input`, `.post-item`, …) and one CSS file per feature (`ui.css`, `users.css`, `posts.css`, plus `index.css` and `App.css`). Revises D21's "one plain CSS file" | Keep position-based selectors in one file; CSS Modules (rejected in D21) | Selectors no longer break when markup moves between components; each feature owns its styles | AI proposal accepted by Adrian |
+| D63 | "+ New post" toggles the form open and closed, and points at it with `aria-controls`; the form is named "New post" | Drop `aria-expanded`; keep open-only | The button announced itself as a toggle but did nothing when pressed again (code review) | AI proposal accepted by Adrian |
+| D64 | "just added" tag sits beside the post heading, not inside it | Keep it inside the `<h3>` | The heading name should be the title alone (code review) | AI proposal accepted by Adrian |
+| D65 | Tests query by role or label: field errors through the accessible description, messages through `role="status"`, posts through their heading. Four text queries remain for plain text with no role | Keep `getByText` | `CLAUDE.md` rule; the description checks also prove that each error is linked to its field (code review) | AI proposal accepted by Adrian |
+| D66 | Two review nits left open: a message for an empty `/users` response, and clearing the POST error on edit | Fix them too | The API never returns an empty list; the error clears on the next submit. Listed in the README under "more time" | AI proposal accepted by Adrian |
 
 ## Skills used
 
@@ -448,6 +452,9 @@ Command: `npm test` (`vitest run`). Planned: 11 tests (after the D46 cuts). `api
 | 2026-11-20 | `npx vitest run src/users.test.tsx src/api.test.ts` | 7/1/8 | Task 3 GREEN except E4, which needs the posts panel (ruling in ledger) |
 | 2026-11-20 | `npx vitest run src/posts.test.tsx` | 1/4/5 | Task 4 RED (E6 already passed: `aria-pressed` was built in Task 3) |
 | 2026-11-20 | `npx vitest run` (posts, users, api) | 13/0/13 | Task 4 GREEN, E4 included |
+| 2026-11-20 | `npx vitest run` after the modular refactor | 27/0/27 | No test changes needed |
+| 2026-11-20 | `npx vitest run` with new tests E15, E16, E17 and tightened E10 | 26/4/30 | RED: no toggle, no `aria-controls`, mock hangs on an already-aborted signal, heading included "just added" |
+| 2026-11-20 | `npx vitest run` + `npm run build` + `npm run lint` | 30/0/30 | GREEN after the fixes and the role/label query switch; browser check clean |
 | 2026-11-20 | `npx vitest run src/newPost.test.tsx` | 0/14/14 | Task 5 RED |
 | 2026-11-20 | `npx vitest run` | 26/1/27 | E10 failed on the test's query (heading name includes "just added"); test fixed |
 | 2026-11-20 | `npx vitest run -t E10` with trimming removed | 0/1 | Mutation check: E10 catches untrimmed posts |

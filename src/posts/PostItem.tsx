@@ -10,15 +10,10 @@ type PostItemProps = {
 export function PostItem({ title, body, isNew = false }: PostItemProps) {
   return (
     <li className="post-item">
-      <h3 className="post-title">
-        {title}
-        {isNew ? (
-          <>
-            {' '}
-            <span className="tag">just added</span>
-          </>
-        ) : null}
-      </h3>
+      <div className="post-heading">
+        <h3 className="post-title">{title}</h3>
+        {isNew ? <span className="tag">just added</span> : null}
+      </div>
       <p className="post-body">{body}</p>
     </li>
   );

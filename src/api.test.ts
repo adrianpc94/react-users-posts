@@ -19,3 +19,12 @@ it('E1 getJson rejects on a non-OK response', async () => {
   await api.fail('GET /users', 500);
   await assertion;
 });
+
+it('E17 an already-aborted request rejects with AbortError, like real fetch', async () => {
+  installFetchMock();
+  const controller = new AbortController();
+  controller.abort();
+  await expect(
+    createPost({ userId: 1, title: 't', body: 'b' }, controller.signal),
+  ).rejects.toMatchObject({ name: 'AbortError' });
+});

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { CreatedPost, User } from '../api';
 import { useUserPosts } from '../hooks';
 import { assertNever } from '../requestState';
@@ -22,6 +22,7 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
   const { state, retry } = useUserPosts(user.id);
   const [formOpen, setFormOpen] = useState(false);
   const newPostButtonRef = useRef<HTMLButtonElement>(null);
+  const formId = useId();
 
   function closeForm() {
     setFormOpen(false);
@@ -37,12 +38,15 @@ export function PostsPanel({ user, createdPosts, onCreated }: PostsPanelProps) {
           type="button"
           className="button"
           aria-expanded={formOpen}
-          onClick={() => setFormOpen(true)}
+          aria-controls={formOpen ? formId : undefined}
+          onClick={() => (formOpen ? closeForm() : setFormOpen(true))}
         >
           + New post
         </button>
       </header>
-      {formOpen ? <NewPostForm userId={user.id} onCreated={onCreated} onClose={closeForm} /> : null}
+      {formOpen ? (
+        <NewPostForm id={formId} userId={user.id} onCreated={onCreated} onClose={closeForm} />
+      ) : null}
       <PostList created={createdPosts} fetched={state.status === 'success' ? state.data : []} />
       {renderStatus()}
     </section>

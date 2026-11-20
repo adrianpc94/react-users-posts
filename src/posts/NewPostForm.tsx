@@ -4,18 +4,20 @@ import './posts.css';
 import { useNewPostForm } from './useNewPostForm';
 
 type NewPostFormProps = {
+  /** Lets the "+ New post" button point at this form (aria-controls). */
+  id: string;
   userId: number;
   onCreated: (post: CreatedPost) => void;
   onClose: () => void;
 };
 
-export function NewPostForm(props: NewPostFormProps) {
+export function NewPostForm({ id, ...options }: NewPostFormProps) {
   const { values, errors, submit, setField, handleSubmit, cancel, titleRef, bodyRef } =
-    useNewPostForm(props);
+    useNewPostForm(options);
   const submitting = submit.status === 'submitting';
 
   return (
-    <form className="new-post" onSubmit={handleSubmit} noValidate>
+    <form id={id} className="new-post" aria-label="New post" onSubmit={handleSubmit} noValidate>
       <Field label="Title" error={errors.title}>
         {(aria) => (
           <input

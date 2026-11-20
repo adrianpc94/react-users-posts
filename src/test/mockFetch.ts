@@ -30,6 +30,10 @@ export function installFetchMock(): FetchMock {
     calls.set(route, [...(calls.get(route) ?? []), init]);
 
     return new Promise<Response>((resolve, reject) => {
+      if (init.signal?.aborted) {
+        reject(new DOMException('The operation was aborted.', 'AbortError'));
+        return;
+      }
       const entry: Pending = { resolve };
       pending.set(route, [...(pending.get(route) ?? []), entry]);
       init.signal?.addEventListener('abort', () => {

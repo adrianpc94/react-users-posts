@@ -55,7 +55,7 @@
 .tag {
   display: inline-block;
   vertical-align: middle;
-  margin-left: 0.25rem;
+
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
   background: var(--action);
@@ -92,4 +92,16 @@
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.post-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.post-heading .post-title {
+  margin-bottom: 0;
 }

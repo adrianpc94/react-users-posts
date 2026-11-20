@@ -12,10 +12,10 @@ beforeEach(() => {
 
 it('T1 shows loading, then the users', async () => {
   render(<App />);
-  expect(screen.getByText('Loading users…')).toHaveAttribute('role', 'status');
+  expect(screen.getByRole('status')).toHaveTextContent('Loading users…');
   await api.respond('GET /users', users);
   expect(await screen.findByRole('button', { name: 'Leanne Graham' })).toBeInTheDocument();
-  expect(screen.queryByText('Loading users…')).not.toBeInTheDocument();
+  expect(screen.queryByRole('status')).not.toBeInTheDocument();
 });
 
 it('T2 filters by name ignoring case and surrounding spaces, and shows a no-match message', async () => {
@@ -30,7 +30,7 @@ it('T2 filters by name ignoring case and surrounding spaces, and shows a no-matc
 
   await user.clear(search);
   await user.type(search, 'zzz');
-  expect(screen.getByText('No users match "zzz"')).toHaveAttribute('role', 'status');
+  expect(screen.getByRole('status')).toHaveTextContent('No users match "zzz"');
 });
 
 it('T3 shows an error with Retry that reloads the users', async () => {
@@ -40,7 +40,7 @@ it('T3 shows an error with Retry that reloads the users', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load users.");
 
   await user.click(screen.getByRole('button', { name: 'Retry' }));
-  expect(screen.getByText('Loading users…')).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent('Loading users…');
   await api.respond('GET /users', users);
   expect(await screen.findByRole('button', { name: 'Leanne Graham' })).toBeInTheDocument();
 });
@@ -74,9 +74,9 @@ it('E4 a search that hides the selected user keeps the posts panel', async () =>
   await api.respond('GET /users', users);
   await user.click(await screen.findByRole('button', { name: 'Leanne Graham' }));
   await api.respond('GET /users/1/posts', postsFor(1));
-  await screen.findByText('User 1 post A');
+  await screen.findByRole('heading', { name: 'User 1 post A' });
   await user.type(screen.getByRole('searchbox', { name: 'Search users by name' }), 'ervin');
   expect(screen.queryByRole('button', { name: 'Leanne Graham' })).not.toBeInTheDocument();
   expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
-  expect(screen.getByText('User 1 post A')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'User 1 post A' })).toBeInTheDocument();
 });
