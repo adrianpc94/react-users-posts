@@ -102,13 +102,22 @@ full records are in the
 
 ## What I'd do with more time
 
-- An accessibility audit in real browsers and screen readers. jsdom ignores
-  CSS, and the browser check already caught one issue the tests couldn't: a
-  CSS text marker that changed a button's accessible name.
+- Turn the 12 manual checks, which I already ran with Playwright scripts
+  against the live API, into a committed end-to-end suite.
+- CI: run tests, build and lint on every push (GitHub Actions).
+- Catch deprecated APIs automatically with Oxlint's type-aware
+  `no-deprecated` rule (I caught a deprecated `FormEvent` by hand).
+- An accessibility audit with real screen readers. jsdom ignores CSS, and a
+  browser check already caught one issue the tests couldn't: a CSS text
+  marker that changed a button's accessible name.
 - TanStack Query (or SWR) for caching, so going back to a user is instant.
 - Keep the selected user in the URL, so it survives a reload and can be shared.
-- Show a new post immediately, before the server confirms it (optimistic update).
-- One end-to-end test in a real browser (Playwright) against the live API.
+- Component-level tests now that the UI is split into small components
+  (today every test renders the whole app, which tests what users see but
+  makes failures less precise).
+- Consider an optimistic update for new posts. I chose to wait for the
+  server so the feedback is honest and nothing needs rolling back; with a
+  real backend, instant feedback might be worth that extra logic.
 - The two minor code-review points left open: a clearer message if the API
   ever returned no users, and clearing the "couldn't add the post" error as
   soon as you edit the form.
