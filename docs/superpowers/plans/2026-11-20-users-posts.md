@@ -442,7 +442,7 @@ Continues the spec's numbering (D1–D34).
 
 ## Automated testing
 
-Command: `npm test` (`vitest run`). Planned: 11 tests (after the D46 cuts). `api.test.ts` 1 (createPost); `users.test.tsx` 3 (T1, T2+RF3, T3); `posts.test.tsx` 3 (T4, T8, RF5); `newPost.test.tsx` 4 (T5, T6+RF1, T7, RF2).
+Command: `npm test` (`vitest run`). Final count: 30 tests. `api.test.ts` 3 (createPost, E1, E17); `users.test.tsx` 6 (T1–T3, E2–E4); `posts.test.tsx` 5 (T4, T8, RF5, E5, E6); `newPost.test.tsx` 16 (T5–T7, RF2, RF4, Cancel, E7–E16). The 11 planned after the D46 cuts grew to 30 with D54 and the code-review fixes.
 
 | Date | Command | Result (passed/failed/total) | Notes |
 |---|---|---|---|
