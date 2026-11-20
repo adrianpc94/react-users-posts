@@ -2,12 +2,13 @@ import { expect, it } from 'vitest';
 import { createPost, getJson, USERS_URL } from './api';
 import { installFetchMock } from './test/mockFetch';
 
-it('createPost sends JSON with a JSON content type', async () => {
+it('A1 createPost sends JSON with a JSON content type', async () => {
   const api = installFetchMock();
   const done = createPost({ userId: 1, title: 't', body: 'b' }, new AbortController().signal);
   await api.respond('POST /posts', { id: 101 });
   await done;
-  const [init] = api.calls('POST /posts');
+  const [init = {}] = api.calls('POST /posts');
+  expect(api.calls('POST /posts')).toHaveLength(1);
   expect(new Headers(init.headers).get('Content-Type')).toBe('application/json');
   expect(JSON.parse(String(init.body))).toEqual({ userId: 1, title: 't', body: 'b' });
 });

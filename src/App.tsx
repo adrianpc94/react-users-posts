@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './App.css';
-import { useUsers } from './hooks';
+import { useUsers } from './users/useUsers';
 import { PostsPanel } from './posts/PostsPanel';
 import { useCreatedPosts } from './posts/useCreatedPosts';
 import { UsersPanel } from './users/UsersPanel';

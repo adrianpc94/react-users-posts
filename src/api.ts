@@ -31,10 +31,3 @@ export async function createPost(post: NewPost, signal: AbortSignal): Promise<vo
     throw new Error(`POST /posts failed with ${response.status}`);
   }
 }
-
-let localIdCounter = 0;
-
-export function nextLocalId(): string {
-  localIdCounter += 1;
-  return `local-${localIdCounter}`;
-}

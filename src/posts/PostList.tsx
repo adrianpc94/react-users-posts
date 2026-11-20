@@ -9,6 +9,9 @@ type PostListProps = {
 };
 
 export function PostList({ created, fetched }: PostListProps) {
+  // No empty list for assistive tech to announce while posts are still loading.
+  if (created.length === 0 && fetched.length === 0) return null;
+
   return (
     <ul className="post-list" aria-label="Posts">
       {created.map((post) => (

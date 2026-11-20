@@ -15,7 +15,7 @@ export function UserList({ users, selectedUserId, onSelect }: UserListProps) {
           <button
             type="button"
             className="user-button"
-            aria-pressed={user.id === selectedUserId}
+            aria-current={user.id === selectedUserId ? 'true' : undefined}
             onClick={() => onSelect(user.id)}
           >
             {user.name}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { User } from '../api';
 import { assertNever, type RequestState } from '../requestState';
 import { ErrorWithRetry } from '../ui/ErrorWithRetry';
@@ -12,13 +12,34 @@ type UsersPanelProps = {
   onSelect: (userId: number) => void;
 };
 
+function matchesQuery(user: User, query: string): boolean {
+  return user.name.toLowerCase().includes(query.trim().toLowerCase());
+}
+
+/** What the always-present status region says; empty when there is nothing to announce. */
+function statusText(state: RequestState<User[]>, matches: readonly User[], query: string): string {
+  switch (state.status) {
+    case 'loading':
+      return 'Loading users…';
+    case 'error':
+      return '';
+    case 'success':
+      return matches.length === 0 ? `No users match "${query.trim()}"` : '';
+    default:
+      return assertNever(state);
+  }
+}
+
 /** The users column: search box, then the loading, error, no-match or list state. */
 export function UsersPanel({ state, onRetry, selectedUserId, onSelect }: UsersPanelProps) {
   const [query, setQuery] = useState('');
+  const headingId = useId();
+  // Derived during render: no extra state to keep in sync.
+  const matches = state.status === 'success' ? state.data.filter((u) => matchesQuery(u, query)) : [];
 
   return (
-    <section className="users" aria-labelledby="users-heading">
-      <h2 id="users-heading">Users</h2>
+    <section className="users" aria-labelledby={headingId}>
+      <h2 id={headingId}>Users</h2>
       <label className="search">
         <span className="search-label">Search users by name</span>
         <input
@@ -28,27 +49,16 @@ export function UsersPanel({ state, onRetry, selectedUserId, onSelect }: UsersPa
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
-      {renderBody()}
+      {/* Always rendered, so screen readers announce its text when it changes. */}
+      <p role="status" className="status">
+        {statusText(state, matches, query)}
+      </p>
+      {state.status === 'error' ? (
+        <ErrorWithRetry message="Couldn't load users." onRetry={onRetry} />
+      ) : null}
+      {matches.length > 0 ? (
+        <UserList users={matches} selectedUserId={selectedUserId} onSelect={onSelect} />
+      ) : null}
     </section>
   );
-
-  function renderBody() {
-    switch (state.status) {
-      case 'loading':
-        return <p role="status">Loading users…</p>;
-      case 'error':
-        return <ErrorWithRetry message="Couldn't load users." onRetry={onRetry} />;
-      case 'success': {
-        const needle = query.trim().toLowerCase();
-        const matches = state.data.filter((user) => user.name.toLowerCase().includes(needle));
-        return matches.length === 0 ? (
-          <p role="status">No users match "{query.trim()}"</p>
-        ) : (
-          <UserList users={matches} selectedUserId={selectedUserId} onSelect={onSelect} />
-        );
-      }
-      default:
-        return assertNever(state);
-    }
-  }
 }

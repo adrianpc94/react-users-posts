@@ -46,14 +46,14 @@
 
 /* The selected user is marked like a highlighter stroke, plus weight and a
    marker, so it never relies on colour alone. */
-.user-button[aria-pressed='true'] {
+.user-button[aria-current='true'] {
   font-weight: 700;
   background: linear-gradient(transparent 20%, var(--highlight) 20%, var(--highlight) 85%, transparent 85%);
 }
 
 /* Drawn with borders, not text: browsers include ::before text in a button's
    accessible name, which would turn "Leanne Graham" into "▸ Leanne Graham". */
-.user-button[aria-pressed='true']::before {
+.user-button[aria-current='true']::before {
   content: '';
   display: inline-block;
   margin-right: 0.4rem;
@@ -65,4 +65,8 @@
   .users {
     position: static;
   }
+}
+
+.user-button {
+  overflow-wrap: anywhere;
 }

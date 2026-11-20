@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getJson, USERS_URL, userPostsUrl, type Post, type User } from './api';
+import { getJson } from './api';
 import type { RequestState } from './requestState';
 
 /**
@@ -31,12 +31,4 @@ export function useRequest<T>(url: string): { state: RequestState<T>; retry: () 
   }, []);
 
   return { state, retry };
-}
-
-export function useUsers() {
-  return useRequest<User[]>(USERS_URL);
-}
-
-export function useUserPosts(userId: number) {
-  return useRequest<Post[]>(userPostsUrl(userId));
 }

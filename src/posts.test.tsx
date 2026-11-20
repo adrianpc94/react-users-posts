@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it } from 'vitest';
 import App from './App';
@@ -23,9 +23,11 @@ it('T4 selecting a user shows loading, then their posts', async () => {
   expect(screen.getByText('Select a user to see their posts.')).toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Leanne Graham' }));
-  expect(screen.getByRole('button', { name: 'Leanne Graham' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getByRole('button', { name: 'Leanne Graham' })).toHaveAttribute('aria-current', 'true');
   expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
-  expect(screen.getByRole('status')).toHaveTextContent('Loading posts…');
+  const postsRegion = screen.getByRole('region', { name: "Leanne Graham's posts" });
+  expect(within(postsRegion).getByRole('status')).toHaveTextContent('Loading posts…');
+  expect(screen.queryByRole('list', { name: 'Posts' })).not.toBeInTheDocument();
 
   await api.respond('GET /users/1/posts', postsFor(1));
   expect(await screen.findByRole('heading', { name: 'User 1 post A' })).toBeInTheDocument();
@@ -44,7 +46,7 @@ it('T8 switching users quickly shows only the latest user', async () => {
   expect(screen.getByRole('heading', { name: "Ervin Howell's posts" })).toBeInTheDocument();
   expect(screen.queryByRole('heading', { name: 'User 1 post A' })).not.toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-  expect(api.calls('GET /users/1/posts')[0].signal?.aborted).toBe(true);
+  expect(api.calls('GET /users/1/posts')[0]?.signal?.aborted).toBe(true);
 });
 
 it('RF5 a failed posts load shows an error, still offers + New post, and Retry recovers', async () => {
@@ -66,9 +68,9 @@ it('E5 a user with no posts shows "No posts yet."', async () => {
   expect(await screen.findByText('No posts yet.')).toBeInTheDocument();
 });
 
-it('E6 only the selected user is marked as pressed', async () => {
+it('E6 only the selected user is marked as current', async () => {
   const user = await renderWithUsers();
   await user.click(screen.getByRole('button', { name: 'Ervin Howell' }));
-  expect(screen.getByRole('button', { name: 'Ervin Howell' })).toHaveAttribute('aria-pressed', 'true');
-  expect(screen.getByRole('button', { name: 'Leanne Graham' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('button', { name: 'Ervin Howell' })).toHaveAttribute('aria-current', 'true');
+  expect(screen.getByRole('button', { name: 'Leanne Graham' })).not.toHaveAttribute('aria-current');
 });

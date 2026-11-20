@@ -52,11 +52,6 @@ textarea {
   outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-  }
-}
 
 /* ---------- Shared controls ---------- */
 
@@ -102,4 +97,9 @@ textarea {
 [role='status'],
 .muted {
   color: var(--muted);
+}
+
+/* Live regions stay in the page even when empty; collapse them so they take no space. */
+.status:empty {
+  margin: 0;
 }

@@ -15,7 +15,8 @@ it('T1 shows loading, then the users', async () => {
   expect(screen.getByRole('status')).toHaveTextContent('Loading users…');
   await api.respond('GET /users', users);
   expect(await screen.findByRole('button', { name: 'Leanne Graham' })).toBeInTheDocument();
-  expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  // The status region stays in the page (so later changes are announced) but is now empty.
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });
 
 it('T2 filters by name ignoring case and surrounding spaces, and shows a no-match message', async () => {
@@ -79,4 +80,11 @@ it('E4 a search that hides the selected user keeps the posts panel', async () =>
   expect(screen.queryByRole('button', { name: 'Leanne Graham' })).not.toBeInTheDocument();
   expect(screen.getByRole('heading', { name: "Leanne Graham's posts" })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'User 1 post A' })).toBeInTheDocument();
+});
+
+it('E20 a network failure (no HTTP response) shows the error and Retry', async () => {
+  render(<App />);
+  await api.networkError('GET /users');
+  expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load users.");
+  expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 });

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
-import { createPost, nextLocalId, type CreatedPost } from '../api';
+import { createPost, type CreatedPost } from '../api';
+import { nextLocalId } from './localId';
 
-export type FieldName = 'title' | 'body';
+type FieldName = 'title' | 'body';
 type Values = Record<FieldName, string>;
 type FieldErrors = Partial<Record<FieldName, string>>;
-export type SubmitState = { status: 'idle' } | { status: 'submitting' } | { status: 'error' };
+type SubmitState = { status: 'idle' } | { status: 'submitting' } | { status: 'error' };
 
 const REQUIRED_MESSAGE: Record<FieldName, string> = {
   title: 'Title is required',
@@ -52,6 +53,8 @@ export function useNewPostForm({ userId, onCreated, onClose }: Options) {
     event.preventDefault();
     if (submit.status === 'submitting') return;
 
+    // A new attempt replaces the previous send error, whatever happens next.
+    setSubmit({ status: 'idle' });
     const found = validate(values);
     setErrors(found);
     if (found.title || found.body) {
@@ -65,6 +68,8 @@ export function useNewPostForm({ userId, onCreated, onClose }: Options) {
     const post = { userId, title: values.title.trim(), body: values.body.trim() };
     try {
       await createPost(post, controller.signal);
+      // Finished: closing the form must not cancel a request that already succeeded.
+      controllerRef.current = null;
       onCreated({ ...post, localId: nextLocalId() });
       onClose();
     } catch {

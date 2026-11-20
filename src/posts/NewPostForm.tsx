@@ -17,7 +17,16 @@ export function NewPostForm({ id, ...options }: NewPostFormProps) {
   const submitting = submit.status === 'submitting';
 
   return (
-    <form id={id} className="new-post" aria-label="New post" onSubmit={handleSubmit} noValidate>
+    <form
+      id={id}
+      className="new-post"
+      aria-label="New post"
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') cancel();
+      }}
+      noValidate
+    >
       <Field label="Title" error={errors.title}>
         {(aria) => (
           <input

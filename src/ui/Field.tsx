@@ -2,7 +2,7 @@ import { useId, type ReactNode } from 'react';
 import './ui.css';
 
 /** Props a control needs so assistive tech links it to its error. */
-export type FieldAria = { 'aria-invalid'?: true; 'aria-describedby'?: string };
+type FieldAria = { 'aria-invalid'?: true; 'aria-describedby'?: string };
 
 type FieldProps = {
   label: string;

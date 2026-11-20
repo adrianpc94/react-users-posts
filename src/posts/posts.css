@@ -105,3 +105,11 @@
 .post-heading .post-title {
   margin-bottom: 0;
 }
+
+/* Long unbroken words (pasted URLs, keyboard mashing) must wrap, not widen the page. */
+.posts-header h2,
+.post-title,
+.post-body {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

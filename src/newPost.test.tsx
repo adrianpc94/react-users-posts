@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { beforeEach, expect, it } from 'vitest';
 import App from './App';
@@ -62,6 +62,9 @@ it('T6 a valid post shows Adding…, is sent once, then appears first and the fo
   expect(items[0]).toHaveTextContent('just added');
   expect(screen.queryByRole('textbox', { name: 'Title' })).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: '+ New post' })).toHaveFocus();
+  // The finished request must not be cancelled when the form closes (it showed as a
+  // cancelled POST in the browser's network panel).
+  expect(api.calls('POST /posts')[0]?.signal?.aborted).toBe(false);
 });
 
 it('T7 a failed POST keeps the text and re-enables the button', async () => {
@@ -83,7 +86,7 @@ it('RF2 switching users mid-POST aborts it and adds nothing', async () => {
   await user.click(screen.getByRole('button', { name: 'Ervin Howell' }));
   await api.respond('GET /users/2/posts', postsFor(2));
   await screen.findByRole('heading', { name: 'User 2 post A' });
-  expect(api.calls('POST /posts')[0].signal?.aborted).toBe(true);
+  expect(api.calls('POST /posts')[0]?.signal?.aborted).toBe(true);
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
   await user.click(screen.getByRole('button', { name: 'Leanne Graham' }));
@@ -118,7 +121,7 @@ it('RF4 created posts survive switching users, newest first', async () => {
   expect(items[1]).toHaveTextContent('First');
 });
 
-it('Cancel closes the form, discards the text and refocuses + New post', async () => {
+it('C1 Cancel closes the form, discards the text and refocuses + New post', async () => {
   const user = await openFormFor('Leanne Graham', 1);
   await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Draft');
   await user.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -147,7 +150,7 @@ it('E8 Cancel during sending aborts the POST and adds nothing', async () => {
   const user = await openFormFor('Leanne Graham', 1);
   await addPost(user, 'My post', 'Hello');
   await user.click(screen.getByRole('button', { name: 'Cancel' }));
-  expect(api.calls('POST /posts')[0].signal?.aborted).toBe(true);
+  expect(api.calls('POST /posts')[0]?.signal?.aborted).toBe(true);
   expect(screen.queryByRole('heading', { name: 'My post' })).not.toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
@@ -165,7 +168,7 @@ it('E9 retrying after a failed POST adds the post', async () => {
 it('E10 submitted values are trimmed when sent and shown', async () => {
   const user = await openFormFor('Leanne Graham', 1);
   await addPost(user, '  My post  ', '  Hello  ');
-  expect(JSON.parse(String(api.calls('POST /posts')[0].body))).toEqual({
+  expect(JSON.parse(String(api.calls('POST /posts')[0]?.body))).toEqual({
     userId: 1,
     title: 'My post',
     body: 'Hello',
@@ -236,4 +239,33 @@ it('E16 the form is a named region the toggle controls', async () => {
   await openFormFor('Leanne Graham', 1);
   const form = screen.getByRole('form', { name: 'New post' });
   expect(screen.getByRole('button', { name: '+ New post' })).toHaveAttribute('aria-controls', form.id);
+});
+
+it('E18 a new submit attempt clears the previous send error', async () => {
+  const user = await openFormFor('Leanne Graham', 1);
+  await addPost(user, 'My post', 'Hello');
+  await api.fail('POST /posts');
+  await screen.findByRole('alert');
+
+  await user.clear(screen.getByRole('textbox', { name: 'Title' }));
+  await user.click(screen.getByRole('button', { name: 'Add post' }));
+  expect(screen.getByRole('textbox', { name: 'Title' })).toHaveAccessibleDescription('Title is required');
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+it('E19 a second submit while sending is ignored', async () => {
+  // A disabled submit button blocks clicks and Enter, so the in-flight guard can only be
+  // reached by a programmatic submit; fireEvent is the honest way to exercise it.
+  const user = await openFormFor('Leanne Graham', 1);
+  await addPost(user, 'My post', 'Hello');
+  fireEvent.submit(screen.getByRole('form', { name: 'New post' }));
+  expect(api.calls('POST /posts')).toHaveLength(1);
+});
+
+it('E21 Escape closes the form, discards the text and refocuses + New post', async () => {
+  const user = await openFormFor('Leanne Graham', 1);
+  await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Draft');
+  await user.keyboard('{Escape}');
+  expect(screen.queryByRole('form', { name: 'New post' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '+ New post' })).toHaveFocus();
 });

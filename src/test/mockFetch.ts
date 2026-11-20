@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 
 type Pending = {
   resolve: (response: Response) => void;
+  reject: (reason: unknown) => void;
 };
 
 export type FetchMock = {
@@ -10,6 +11,8 @@ export type FetchMock = {
   respond(route: string, data: unknown): Promise<void>;
   /** Answers the oldest pending request on `route` with an error status. */
   fail(route: string, status?: number): Promise<void>;
+  /** Fails the oldest pending request on `route` with no response at all (offline, DNS, CORS). */
+  networkError(route: string): Promise<void>;
   /** Every request made on `route`, in order; [] if none. */
   calls(route: string): RequestInit[];
 };
@@ -34,7 +37,7 @@ export function installFetchMock(): FetchMock {
         reject(new DOMException('The operation was aborted.', 'AbortError'));
         return;
       }
-      const entry: Pending = { resolve };
+      const entry: Pending = { resolve, reject };
       pending.set(route, [...(pending.get(route) ?? []), entry]);
       init.signal?.addEventListener('abort', () => {
         pending.set(route, (pending.get(route) ?? []).filter((p) => p !== entry));
@@ -44,23 +47,27 @@ export function installFetchMock(): FetchMock {
   };
   vi.stubGlobal('fetch', fetchMock);
 
-  async function settle(route: string, response: Response): Promise<void> {
+  async function settle(route: string, finish: (entry: Pending) => void): Promise<void> {
+    let entry: Pending | undefined;
     await vi.waitFor(() => {
-      if (!pending.get(route)?.length) {
+      entry = pending.get(route)?.[0];
+      if (!entry) {
         const open = [...pending].filter(([, list]) => list.length).map(([r]) => r);
         throw new Error(`No pending request on "${route}". Pending: ${open.join(', ') || 'none'}`);
       }
     });
-    const [first, ...rest] = pending.get(route) ?? [];
-    pending.set(route, rest);
+    const found = entry as Pending; // set by the waitFor callback above, which throws until it is
+    pending.set(route, (pending.get(route) ?? []).slice(1));
     await act(async () => {
-      first.resolve(response);
+      finish(found);
     });
   }
 
   return {
-    respond: (route, data) => settle(route, new Response(JSON.stringify(data), { status: 200 })),
-    fail: (route, status = 500) => settle(route, new Response(null, { status })),
+    respond: (route, data) =>
+      settle(route, (e) => e.resolve(new Response(JSON.stringify(data), { status: 200 }))),
+    fail: (route, status = 500) => settle(route, (e) => e.resolve(new Response(null, { status }))),
+    networkError: (route) => settle(route, (e) => e.reject(new TypeError('Failed to fetch'))),
     calls: (route) => calls.get(route) ?? [],
   };
 }
