@@ -12,3 +12,13 @@ Running log for the README's "How I used AI" section. Format and rules:
 - **Asked:** Launch a subagent to do an adversarial review of the design spec.
 - **Accepted:** Nearly all 15 findings, applied to the spec. The ones that changed the design: a `signal.aborted` guard before state updates (abort alone wouldn't make the race test meaningful with a mocked `fetch`), resetting the posts panel per user (A's posts showed under B's name for one frame), rendering the submitted title/body (the API returns no title/body without a JSON header), aborting an in-flight POST on user switch, plus missing decisions (stack, endpoint, accessibility) and a deterministic `fetch` mock with deferred promises.
 - **Corrected:** The review caught mistakes in the AI's own first spec: the race test as planned would have proven nothing, and "use the API's title/body" would have rendered a blank post. Adrian kept the three-place decision tracking that the reviewer called costly, and agreed to the AI's modified cut order (Retry kept until last, against the reviewer's order).
+
+### 2026-11-20 Implementation plan
+- **Asked:** Write the implementation plan from the approved spec, explicitly using the TypeScript and React best-practice skills.
+- **Accepted:** Pending Adrian's review of `docs/superpowers/plans/2026-11-20-users-posts.md` (7 tasks, 14 planned tests, plan decisions D35–D45).
+- **Corrected:** The AI's self-review found two spec items with no explicit step ("+ New post" in every posts state, and the selection persisting through search) and fixed them before handing the plan over.
+
+### 2026-11-20 Adversarial review of the plan
+- **Asked:** Launch a subagent to do an adversarial review of the implementation plan.
+- **Accepted:** All findings. The AI checked the version claims against npm before accepting them. Main changes: scaffold flags and the dotfile-safe move for create-vite 9.3.4; the `assertNever` helper (a `never` local fails `noUnusedLocals`); essential CSS moved into Task 3, with the `▸` marker done in CSS so buttons keep their accessible names; aria attributes set only when an error exists; T8's scope recorded honestly.
+- **Corrected:** The AI's plan assumed tooling that had changed: create-vite now ships Oxlint, not ESLint, and jsdom 31 needs Node ≥ 24.15. The AI's 2 h 40 budget ignored the 1 h 46 already spent on design. Adrian decided that design time counts toward the 3 hours, which cut three tests, the styling pass and one review. He also chose to keep Oxlint and to upgrade Node.

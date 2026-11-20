@@ -1,6 +1,6 @@
 # Users & Posts: design
 
-Date: 2026-11-20 · Status: draft, awaiting Adrian's approval
+Date: 2026-11-20 · Status: approved by Adrian (2026-11-20, asked to proceed to the implementation plan)
 Brief and requirement checklist: [`docs/assignment.md`](../../assignment.md)
 
 ## Intent
