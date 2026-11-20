@@ -24,6 +24,7 @@ function statusText(state: RequestState<User[]>, matches: readonly User[], query
     case 'error':
       return '';
     case 'success':
+      if (state.data.length === 0) return 'No users found.';
       return matches.length === 0 ? `No users match “${query.trim()}”` : '';
     default:
       return assertNever(state);

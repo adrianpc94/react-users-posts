@@ -281,3 +281,12 @@ it('E22 leaving the page with an unsent draft asks for confirmation; an empty fo
   await user.type(screen.getByRole('textbox', { name: 'Title' }), 'Draft');
   expect(leave()).toBe(true);
 });
+
+it('E24 editing after a failed send clears the send error', async () => {
+  const user = await openFormFor('Leanne Graham', 1);
+  await addPost(user, 'My post', 'Hello');
+  await api.fail('POST /posts');
+  await screen.findByRole('alert');
+  await user.type(screen.getByRole('textbox', { name: 'Body' }), '!');
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});

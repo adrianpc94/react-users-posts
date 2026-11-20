@@ -91,3 +91,9 @@ it('E20 a network failure (no HTTP response) shows the error and Retry', async (
   expect(screen.getByRole('alert')).toHaveTextContent('Check your connection and try again.');
   expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
 });
+
+it('E23 an empty users response says there are no users, not "no match"', async () => {
+  render(<App />);
+  await api.respond('GET /users', []);
+  expect(await screen.findByText('No users found.')).toHaveAttribute('role', 'status');
+});

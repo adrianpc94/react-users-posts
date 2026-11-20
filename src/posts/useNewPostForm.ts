@@ -52,6 +52,8 @@ export function useNewPostForm({ userId, onCreated, onClose }: Options) {
 
   function setField(name: FieldName, value: string) {
     setValues((prev) => ({ ...prev, [name]: value }));
+    // Editing makes a previous send error out of date.
+    setSubmit((prev) => (prev.status === 'error' ? { status: 'idle' } : prev));
     // An error clears as soon as the field is fixed; new errors wait for submit.
     if (value.trim()) {
       setErrors((prev) => (prev[name] ? { ...prev, [name]: undefined } : prev));
