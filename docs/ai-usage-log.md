@@ -22,3 +22,21 @@ Running log for the README's "How I used AI" section. Format and rules:
 - **Asked:** Launch a subagent to do an adversarial review of the implementation plan.
 - **Accepted:** All findings. The AI checked the version claims against npm before accepting them. Main changes: scaffold flags and the dotfile-safe move for create-vite 9.3.4; the `assertNever` helper (a `never` local fails `noUnusedLocals`); essential CSS moved into Task 3, with the `▸` marker done in CSS so buttons keep their accessible names; aria attributes set only when an error exists; T8's scope recorded honestly.
 - **Corrected:** The AI's plan assumed tooling that had changed: create-vite now ships Oxlint, not ESLint, and jsdom 31 needs Node ≥ 24.15. The AI's 2 h 40 budget ignored the 1 h 46 already spent on design. Adrian decided that design time counts toward the 3 hours, which cut three tests, the styling pass and one review. He also chose to keep Oxlint and to upgrade Node.
+
+### 2026-11-20 Build (Tasks 1–5) and final review
+- **Asked:** Execute the plan inline, tests first, committing each task. Adrian then asked to keep every test and to add tests for all edge cases found.
+- **Accepted:** The scaffold, test tooling, `fetch` mock, API layer, hooks and the three components as the AI wrote them; 27 tests (14 edge-case tests added at Adrian's request); the `code-review` result (no critical or important issues, 6 nits).
+- **Corrected:**
+  - Adrian reversed the AI's time-saving test cuts ("I don't want to drop any test") and asked for edge-case tests, accepting the overrun.
+  - The VPN (Surfshark) reset the AI's downloads. Adrian ran `npm install` himself, and npm picked jsdom 29, which works on Node 24.14, so the planned Node upgrade wasn't needed.
+  - The AI's first E10 test queried the post heading by a name that didn't include "just added". It was fixed, then checked by breaking the trimming on purpose.
+
+### 2026-11-20 Styling pass
+- **Asked:** Adrian: "the UI is unaligned right and ugly, apply and fix the UI styles".
+- **Accepted:** A `frontend-design` pass: a centred layout, a user index with a highlighter-yellow selection, a reading column for posts, a book serif for headings and a sans-serif for the UI, and a bottle-green accent. Checked in a real browser at desktop and phone widths.
+- **Corrected:** The AI's own earlier decision (D52) was wrong. The browser check showed that the `::before` "▸" text was announced as part of the button's name ("▸ Leanne Graham"). The tests couldn't catch this because jsdom ignores CSS. The AI replaced it with a border-drawn triangle.
+
+### 2026-11-20 Manual checks and modular refactor
+- **Asked:** Adrian asked the AI to run the 12 manual checks with Playwright, and to make the app "very modular in components" using a subagent to find improvements.
+- **Accepted:** All 12 manual checks passed in real Chrome against the live API. They are recorded as "AI via Playwright", not as checked by Adrian. From the subagent review, refactors 1–8 were applied (D58–D62): feature folders; `useNewPostForm` and `useCreatedPosts` hooks; shared `ErrorWithRetry` and `Field`; `PostItem` / `PostList`; `UsersPanel` split from `UserList`; explicit classes and per-feature CSS. The 27 tests stayed green with no changes.
+- **Corrected:** The reviewer's "don't split" list was followed: no generic loading, header, search or async wrappers. The CSS moves were checked in the browser, because jsdom can't catch CSS problems.

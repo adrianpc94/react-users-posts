@@ -407,6 +407,11 @@ Continues the spec's numbering (D1–D34).
 | D55 | A user with no posts shows `No posts yet.` | Show an empty list | The spec is silent; an empty panel looks broken. Found while listing edge cases | AI (builder's call) |
 | D56 | Selected-user marker drawn as a CSS border triangle, not `::before` text (corrects D52) | `content: '▸ '`; CSS alt-text syntax | Found in the browser check: Chrome includes `::before` text in the accessible name ("▸ Leanne Graham"). jsdom ignores CSS, so the tests could not catch it | AI (builder's call) |
 | D57 | The Task 6 styling pass is done after all (reverses that part of D46). Palette: slate paper, navy ink, bottle-green actions, highlighter-yellow selection. Type: a book serif for headings and the system sans for the UI. Layout: centred, max 72rem | Keep only the minimal CSS | Adrian: "the UI is unaligned right and ugly" | Adrian |
+| D58 | Feature folders: `ui/` (shared `ErrorWithRetry`, `Field`), `users/` (`UsersPanel`, `UserList`), `posts/` (`PostsPanel`, `PostList`, `PostItem`, `NewPostForm`, hooks). Replaces the flat `components/` folder | Keep a flat `components/` | Adrian asked for a very modular app; the split brings the count to 9 component files, where folders pay off | AI proposal accepted by Adrian |
+| D59 | Form logic in `useNewPostForm` (values, validation, submit, cancel, abort on unmount), called inside `NewPostForm`; created posts in `useCreatedPosts`, used by `App` | Keep the logic in the components | Components become markup; the two near-duplicate "clear error" handlers merge into `setField`. The hook stays inside the form so unmounting still aborts the POST | AI proposal accepted by Adrian |
+| D60 | One `ErrorWithRetry`, one `PostItem` / `PostList`, and `UserList` split from `UsersPanel` | Separate `Loading`, `PostsHeader`, `UserSearch` or generic async wrappers | Real reuse or a single job per file; the reviewer advised against the other splits as indirection without reuse | AI proposal accepted by Adrian |
+| D61 | `Field` renders the label, the control (render prop) and the error, with `useId` ids; the error stays outside the `<label>` | Hard-coded `title-error` / `body-error` ids | Unique ids, and the field's accessible name stays "Title" / "Body" | AI proposal accepted by Adrian |
+| D62 | Explicit class names (`.button`, `.button-secondary`, `.input`, `.post-item`, …) and one CSS file per feature (`ui.css`, `users.css`, `posts.css`, plus `index.css` and `App.css`). Revises D21's "one plain CSS file" | Keep position-based selectors in one file; CSS Modules (rejected in D21) | Selectors no longer break when markup moves between components; each feature owns its styles | AI proposal accepted by Adrian |
 
 ## Skills used
 
@@ -429,6 +434,7 @@ Continues the spec's numbering (D1–D34).
 | 2026-11-20 | This plan vs the spec (coverage, step clarity, type consistency, Review Focus, proportion) | AI self-review (`writing-plans` checklist) | Two spec items had no explicit step: "+ New post" available in every posts state (D25), and the selection persisting through search (D17). The test-count line was ambiguous. Types and names were consistent across tasks; every Review Focus item has an owning test | Fixed inline (Task 5 Step 4, Task 4 Interfaces, Automated testing) |
 | 2026-11-20 | This plan, adversarial review requested by Adrian | Subagent (general-purpose, adversarial reviewer) | Blockers: (1) the budget didn't fit, because design time already used about 1 h 46 of the 3 h; (2) create-vite 9.3.4 ships Oxlint, not ESLint, and its rolldown prompt no longer exists. Should-fix: scaffold move skipped dotfiles and used stale template file names; jsdom 31 needs Node ≥ 24.15 (24.14 installed); the getJson test would trigger an unhandled rejection; T8 weaker than the spec says; cutting Task 6 would remove visible selection, and a `▸` text marker would break the button's accessible name; `const _x: never` fails `noUnusedLocals`; `strict` not visible in tsconfig. Nits: aria attributes only when an error exists; mock robustness; D-numbers in code snippets; "branch diff" on `main`; D25 untested; `ai-log` missing from Skills used. Versions checked against npm by the AI (create-vite 9.3.4, jsdom 31.0.1 engines, vitest 5.1.1, vite 8.3.8, typescript 7.0.2) | All applied. Adrian decided: design time counts (D46), keep Oxlint (D47), upgrade Node (D48). Fixes recorded as D49–D53 |
 | 2026-11-20 | Code `d33672f..HEAD` (all build commits) | `code-review` skill (medium) | No critical or important issues; the abort, retry, keyed-remount and POST-abort paths were traced with no race found. 6 nits:<br>1. `No users match ""` if `/users` returns `[]`<br>2. "+ New post" has `aria-expanded` but doesn't toggle closed<br>3. the "just added" tag is inside the post heading<br>4. the mock doesn't reject a signal that is already aborted<br>5. some tests query by text where `CLAUDE.md` asks for role/label<br>6. the POST error stays visible while editing | Recorded as deferred minors in the ledger; Adrian to decide whether to fix |
+| 2026-11-20 | Component structure (modularity), requested by Adrian | Subagent (general-purpose, read-only) | Proposed a feature-folder tree. Six "do" refactors: `useNewPostForm`, `ErrorWithRetry`, `PostItem` / `PostList`, split `UserList`, `Field`, `useCreatedPosts`. Optional: feature folders and explicit per-feature CSS. A "don't split" list. Risks: keyed remount, abort on unmount, focus refs, the error outside `<label>`, the E10 exact heading text, CSS failing silently in jsdom | Adrian: "do it". Applied 1–8 (D58–D62); 27/27 tests, build, lint and a browser check all green |
 
 ## Automated testing
 
@@ -453,15 +459,17 @@ Scenarios, steps and expected results are in the spec's Manual testing table; re
 
 | Scenario | Steps | Expected | Result | Checked by | Date |
 |---|---|---|---|---|---|
-| Users load | see spec | see spec | | | |
-| Search | see spec | see spec | | | |
-| Select user | see spec | see spec | | | |
-| Validation | see spec | see spec | | | |
-| Create post | see spec | see spec | | | |
-| Created post persists | see spec | see spec | | | |
-| Two creates | see spec | see spec | | | |
-| Load errors | see spec | see spec | | | |
-| POST error | see spec | see spec | | | |
-| Switch on slow network | see spec | see spec | | | |
-| Narrow screen | see spec | see spec | | | |
-| Keyboard | see spec | see spec | | | |
+| Users load | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Search | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Select user | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Validation | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Create post | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Created post persists | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Two creates | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Load errors | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| POST error | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Switch on slow network | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Narrow screen | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+| Keyboard | see spec | see spec | Pass | AI via Playwright (real Chrome, live API) | 2026-11-20 |
+
+How the checks were run: Playwright drove Chrome against the dev server and the live API. For check 8 and check 9, request blocking used `page.route(…, abort)` instead of DevTools. For check 10, one user's posts were delayed by 3 s with `page.route` (instead of "Slow 3G") while the AI clicked through two other users; only the last user's posts showed and no alert appeared. Check 7: no warnings or errors in the console.
