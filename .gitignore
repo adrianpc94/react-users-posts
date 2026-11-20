@@ -10,3 +10,11 @@ coverage/
 .DS_Store
 *.log
 .superpowers/
+logs
+dist-ssr
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
